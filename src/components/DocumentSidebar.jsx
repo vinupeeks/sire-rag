@@ -1,342 +1,243 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FileText, Layers, Hash, CheckCircle2, Upload, Loader2, RefreshCw } from 'lucide-react';
+import { BookOpen, FileText, Layers, Loader2, Plus, Ship, Upload, ChevronLeft, ChevronRight, MessageCircle, Clock3 } from 'lucide-react';
+import { Button } from './ui/Button';
+import { Card } from './ui/Card';
 
-const DocumentSidebar = ({ activeChapter, setActiveChapter, userId, onUploadSuccess }) => {
-    const [uploadedDocuments, setUploadedDocuments] = useState([]);
-    const [isLoadingList, setIsLoadingList] = useState(true);
-    const [isUploading, setIsUploading] = useState(false);
-    const [chapterInput, setChapterInput] = useState('');
+const DocumentSidebar = ({
+  userId,
+  activeChapter,
+  setActiveChapter,
+  sidebarCollapsed,
+  onCollapse,
+  chatHistory,
+  activeChatId,
+  onNewChat,
+  onSelectChat,
+  onUploadSuccess,
+}) => {
+  const [uploadedDocuments, setUploadedDocuments] = useState([]);
+  const [isLoadingList, setIsLoadingList] = useState(true);
+  const [chapterInput, setChapterInput] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
 
-    const [selectedDocument, setSelectedDocument] = useState(null);
+  const fetchUserPdfs = async () => {
+    if (!userId) return;
+    setIsLoadingList(true);
 
-    const fetchUserPdfs = async () => {
-        if (!userId) return;
-        setIsLoadingList(true);
-        try {
-            const response = await axios.get(`http://localhost:3003/api/rag/user-pdfs`, {
-                params: { user_id: Number(userId) }
-            });
-            if (response.data.status) {
-                setUploadedDocuments(response.data.data);
-                if (response.data.data.length > 0 && !activeChapter) {
-                    setActiveChapter(response.data.data[0].chapterNumber);
-                }
-            }
-        } catch (error) {
-            console.error("Failed to fetch user PDF list:", error);
-        } finally {
-            setIsLoadingList(false);
+    try {
+      const response = await axios.get('http://localhost:3003/api/rag/user-pdfs', {
+        params: { user_id: Number(userId) },
+      });
+
+      if (response.data.status) {
+        setUploadedDocuments(response.data.data || []);
+        if (response.data.data.length > 0 && !activeChapter) {
+          setActiveChapter(response.data.data[0].chapterNumber);
         }
-    };
+      }
+    } catch (error) {
+      console.error('Failed to fetch user PDF list:', error);
+    } finally {
+      setIsLoadingList(false);
+    }
+  };
 
-    useEffect(() => {
-        fetchUserPdfs();
-    }, [userId]);
+  useEffect(() => {
+    fetchUserPdfs();
+  }, [userId]);
 
-    const handleFileUpload = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
+  const handleFileUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-        if (!chapterInput.trim()) {
-            alert("Please specify a Chapter Number before choosing a file.");
-            e.target.value = null;
-            return;
-        }
+    if (!chapterInput.trim()) {
+      alert('Please enter a chapter number before uploading.');
+      event.target.value = null;
+      return;
+    }
 
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('user_id', Number(userId));
-        formData.append('chapter_number', Number(chapterInput));
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('user_id', Number(userId));
+    formData.append('chapter_number', Number(chapterInput));
 
-        setIsUploading(true);
+    setIsUploading(true);
 
-        try {
-            const response = await axios.post('http://localhost:3003/api/rag/upload-pdf', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+    try {
+      const response = await axios.post('http://localhost:3003/api/rag/upload-pdf', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
 
-            if (response.data.status) {
-                const newDoc = {
-                    recordId: response.data.recordId,
-                    fileName: file.name,
-                    chapterNumber: Number(chapterInput),
-                    chunksProcessed: response.data.chunksProcessed || 0,
-                    status: "Indexed"
-                };
-                setUploadedDocuments((prev) => [newDoc, ...prev]);
-                setActiveChapter(Number(chapterInput));
-                setChapterInput('');
-                if (onUploadSuccess) onUploadSuccess(newDoc);
-            }
-        } catch (error) {
-            console.error("Upload failure:", error);
-            alert(error.response?.data?.error || "Failed to process document upload.");
-        } finally {
-            setIsUploading(false);
-            e.target.value = null;
-        }
-    };
+      if (response.data.status) {
+        const newDoc = {
+          recordId: response.data.recordId || `${Date.now()}-${file.name}`,
+          fileName: file.name,
+          chapterNumber: Number(chapterInput),
+          status: 'Indexed',
+        };
+        setUploadedDocuments((prev) => [newDoc, ...prev]);
+        setActiveChapter(Number(chapterInput));
+        setChapterInput('');
+        if (onUploadSuccess) onUploadSuccess(newDoc);
+      }
+    } catch (error) {
+      console.error('Upload failure:', error);
+      alert(error.response?.data?.error || 'Failed to upload document.');
+    } finally {
+      setIsUploading(false);
+      event.target.value = null;
+    }
+  };
+
+  const documentRows = uploadedDocuments.map((doc) => {
+    const isActive = activeChapter === doc.chapterNumber;
 
     return (
-        <div style={styles.sidebar}>
-            {/* Title Header Block */}
-            <div style={styles.header}>
-                <div style={styles.flexBetween}>
-                    <h2 style={styles.title}>SMS SEARCH</h2>
-                    <button onClick={fetchUserPdfs} disabled={isLoadingList} style={styles.refreshBtn}>
-                        <RefreshCw size={14} style={{ animation: isLoadingList ? 'spin 1.5s linear infinite' : 'none' }} />
-                    </button>
-                </div>
-                <p style={styles.subtitle}>Active User Profile ID: <span style={styles.badge}>{userId}</span></p>
-            </div>
-
-            {/* Structured Minimalist Action Box */}
-            <div style={styles.uploadCard}>
-                <div style={styles.inputRow}>
-                    <span style={styles.labelText}>Chapter Target:</span>
-                    <input
-                        type="number"
-                        placeholder="e.g. 2"
-                        min="1"
-                        max="12"
-                        value={chapterInput}
-                        onChange={(e) => setChapterInput(e.target.value)}
-                        disabled={isUploading}
-                        style={styles.inputElement}
-                    />
-                </div>
-
-                <label style={{
-                    ...styles.submitActionLabel,
-                    opacity: isUploading ? 0.6 : 1,
-                    cursor: isUploading ? 'not-allowed' : 'pointer'
-                }}>
-                    {isUploading ? (
-                        <div style={styles.centeredFlex}>
-                            <Loader2 size={14} style={styles.spin} />
-                            <span style={{ fontSize: '12px' }}>Ingesting Data Vectors...</span>
-                        </div>
-                    ) : (
-                        <div style={styles.centeredFlex}>
-                            <Upload size={14} style={{ marginRight: '6px' }} />
-                            <span>Upload Document</span>
-                        </div>
-                    )}
-                    <input type="file" accept=".pdf" onChange={handleFileUpload} disabled={isUploading} style={{ display: 'none' }} />
-                </label>
-            </div>
-
-            <div
-                onClick={() => setActiveChapter(null)}
-                style={{
-                    ...styles.documentItemCard,
-                    borderColor: activeChapter === null ? '#2563eb' : '#e2e8f0',
-                    backgroundColor: activeChapter === null ? '#eff6ff' : '#ffffff',
-                }}
-            >
-                <div style={styles.cardMainTitleRow}>
-                    <Layers size={15} color={activeChapter === null ? '#2563eb' : '#64748b'} />
-                    <span style={styles.cardTextTitle}>
-                        All Documents
-                    </span>
-                </div>
-            </div>
-
-            {/* Dynamic List Rendering Target Viewbox */}
-            <div style={styles.scrollListArea}>
-                {isLoadingList ? (
-                    <div style={styles.emptyStateContainer}>
-                        <Loader2 size={20} style={styles.spin} />
-                        <p style={styles.emptyStateText}>Fetching manifest file array...</p>
-                    </div>
-                ) : uploadedDocuments.length === 0 ? (
-                    <div style={styles.emptyStateContainer}>
-                        <FileText size={28} color="#94a3b8" />
-                        <p style={styles.emptyStateText}>No workspace data entries indexed for this profile structure setup.</p>
-                    </div>
-                ) : (
-                    uploadedDocuments.map((doc) => {
-                        const isActive = activeChapter === doc.chapterNumber;
-                        return (
-                            <div
-                                key={doc.recordId}
-                                onClick={() => !isUploading && setActiveChapter(doc.chapterNumber)}
-                                style={{
-                                    ...styles.documentItemCard,
-                                    borderColor: isActive ? '#2563eb' : '#e2e8f0',
-                                    backgroundColor: isActive ? '#eff6ff' : '#ffffff',
-                                }}
-                            >
-                                <div style={styles.cardMainTitleRow}>
-                                    <FileText size={15} color={isActive ? '#2563eb' : '#64748b'} style={{ flexShrink: 0 }} />
-                                    <span style={{ ...styles.cardTextTitle, color: isActive ? '#1e40af' : '#0f172a' }} title={doc.fileName}>
-                                        {doc.fileName}
-                                    </span>
-                                </div>
-                            </div>
-                        );
-                    })
-                )}
-            </div>
+      <button
+        key={doc.recordId}
+        type="button"
+        onClick={() => setActiveChapter(doc.chapterNumber)}
+        className={`group flex w-full items-start gap-3 rounded-3xl border px-4 py-4 text-left transition-all duration-200 ${
+          isActive
+            ? 'border-cyan-400 bg-slate-900/95 shadow-soft'
+            : 'border-slate-700/80 bg-slate-950/80 hover:border-cyan-400 hover:bg-slate-900/80'
+        }`}
+        title={doc.fileName}
+      >
+        <FileText className={`mt-1 h-5 w-5 ${isActive ? 'text-cyan-300' : 'text-slate-400'}`} />
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-slate-100">{doc.fileName}</p>
+          <p className="mt-1 text-xs text-slate-400">Chapter {doc.chapterNumber} • {doc.status}</p>
         </div>
+      </button>
     );
-};
+  });
 
-const styles = {
-    sidebar: {
-        width: '100%',
-        height: '100%',
-        backgroundColor: '#ffffff',
-        borderRight: '1px solid #e2e8f0',
-        display: 'flex',
-        flexDirection: 'column',
-    },
-    header: {
-        padding: '20px 20px 14px 20px',
-        borderBottom: '1px solid #e2e8f0',
-    },
-    flexBetween: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    title: {
-        fontSize: '16px',
-        fontWeight: 700,
-        color: '#0f172a',
-        margin: 0,
-    },
-    refreshBtn: {
-        background: 'none',
-        border: 'none',
-        color: '#64748b',
-        cursor: 'pointer',
-        padding: '4px',
-    },
-    subtitle: {
-        fontSize: '12px',
-        color: '#64748b',
-        marginTop: '6px',
-        marginImg: 0,
-    },
-    badge: {
-        fontWeight: 600,
-        color: '#0f172a',
-        backgroundColor: '#f1f5f9',
-        padding: '1px 6px',
-        borderRadius: '4px'
-    },
-    uploadCard: {
-        margin: '16px 20px 10px 20px',
-        padding: '14px',
-        backgroundColor: '#f8fafc',
-        borderRadius: '10px',
-        border: '1px solid #e2e8f0',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '10px'
-    },
-    inputRow: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    labelText: {
-        fontSize: '12px',
-        color: '#475569',
-        fontWeight: 500,
-    },
-    inputElement: {
-        width: '75px',
-        padding: '5px 8px',
-        borderRadius: '6px',
-        border: '1px solid #000000',
-        fontSize: '13px',
-        textAlign: 'center',
-        color: '#ffffff',
-        outline: 'none'
-    },
-    submitActionLabel: {
-        backgroundColor: '#0f172a',
-        color: '#ffffff',
-        padding: '8px',
-        borderRadius: '6px',
-        fontSize: '12px',
-        fontWeight: 500,
-        textAlign: 'center',
-    },
-    centeredFlex: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    scrollListArea: {
-        flex: 1,
-        overflowY: 'auto',
-        padding: '10px 20px 20px 20px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '10px'
-    },
-    emptyStateContainer: {
-        margin: 'auto',
-        textAlign: 'center',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '10px'
-    },
-    emptyStateText: {
-        fontSize: '12.5px',
-        color: '#64748b',
-        margin: 0,
-        maxWidth: '85%'
-    },
-    documentItemCard: {
-        padding: '1px 14px',
-        borderRadius: '8px',
-        border: '1px solid',
-        cursor: 'pointer',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '8px',
-        transition: 'all 0.15s ease'
-    },
-    cardMainTitleRow: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-    },
-    cardTextTitle: {
-        fontSize: '13.5px',
-        fontWeight: 600,
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-    },
-    metaRowInfo: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        fontSize: '11px',
-        color: '#64748b'
-    },
-    metaBadgeItem: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '3px'
-    },
-    successBadge: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '3px',
-        color: '#059669',
-        fontWeight: 600
-    },
-    spin: {
-        animation: 'spin 1s linear infinite'
-    }
+  return (
+    <div className="flex h-full flex-col overflow-hidden">
+      <div className="flex items-center justify-between gap-3 px-3 py-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-cyan-400/15 text-cyan-300 shadow-lg shadow-cyan-500/10">
+            <Ship className="h-5 w-5" />
+          </div>
+          {!sidebarCollapsed && (
+            <div>
+              <p className="text-sm font-semibold text-slate-50">Solmarine AI</p>
+              <p className="text-xs text-slate-300">Maritime intelligence workspace</p>
+            </div>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={onCollapse}
+          className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-600/80 bg-slate-950/90 text-slate-100 transition hover:border-cyan-400 hover:text-cyan-300"
+        >
+          {sidebarCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+        </button>
+      </div>
+
+      <div className={sidebarCollapsed ? 'hidden' : 'block'}>
+        <Card className="mx-3 mb-4 rounded-[28px] border border-slate-700/70 bg-slate-950/90 p-4 shadow-soft">
+          <div className="space-y-4">
+            <Button variant="primary" size="default" onClick={onNewChat} className="w-full justify-center gap-2">
+              <Plus className="h-4 w-4" />
+              New chat
+            </Button>
+
+            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-3xl border border-slate-700/80 bg-slate-950/90 px-4 py-3 text-sm font-semibold text-slate-100 transition hover:border-cyan-400 hover:bg-slate-900/80">
+              <Upload className="h-4 w-4 text-cyan-300" />
+              Upload PDF
+              <input type="file" accept=".pdf" className="hidden" onChange={handleFileUpload} disabled={isUploading} />
+            </label>
+
+            <div className="rounded-3xl border border-slate-700/80 bg-slate-900/90 p-3">
+              <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-slate-500">Document chapter</label>
+              <input
+                type="number"
+                min="1"
+                value={chapterInput}
+                onChange={(event) => setChapterInput(event.target.value)}
+                placeholder="e.g. 1"
+                className="w-full rounded-2xl border border-slate-800/80 bg-slate-950/90 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20"
+              />
+            </div>
+          </div>
+        </Card>
+
+        <div className="mx-3 mb-4">
+          <button
+            type="button"
+            onClick={() => setActiveChapter(null)}
+            className={`flex w-full items-center gap-3 rounded-3xl border px-4 py-4 text-left transition-all duration-200 ${
+              activeChapter === null
+                ? 'border-cyan-400 bg-slate-900/95 shadow-soft'
+                : 'border-slate-700/80 bg-slate-950/90 hover:border-cyan-400 hover:bg-slate-900/80'
+            }`}
+          >
+            <Layers className="h-5 w-5 text-cyan-300" />
+            <div>
+              <p className="text-sm font-semibold text-slate-100">All Documents</p>
+              <p className="text-xs text-slate-400">Search across every uploaded file</p>
+            </div>
+          </button>
+        </div>
+
+        <div className="mx-3 mb-3 flex items-center justify-between px-2 text-xs uppercase tracking-[0.24em] text-slate-500">
+          <span>PDF Library</span>
+          <span>{uploadedDocuments.length} files</span>
+        </div>
+
+        <div className="mx-3 mb-4 flex max-h-[24rem] flex-col gap-3 overflow-y-auto pr-1 pb-2">
+          {isLoadingList ? (
+            <div className="flex min-h-[120px] items-center justify-center rounded-3xl border border-dashed border-slate-700/80 bg-slate-950/90 p-5 text-slate-400">
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Fetching uploaded PDFs…
+            </div>
+          ) : uploadedDocuments.length === 0 ? (
+            <div className="flex min-h-[160px] flex-col items-center justify-center gap-3 rounded-3xl border border-dashed border-slate-700/80 bg-slate-950/90 p-5 text-slate-400">
+              <BookOpen className="h-7 w-7 text-slate-500" />
+              <p className="text-sm text-slate-400">No uploaded PDFs yet. Add a document to start your maritime Q&A.</p>
+            </div>
+          ) : (
+            documentRows
+          )}
+        </div>
+
+        <div className="mx-3 mb-3 border-t border-slate-700/80 pt-4">
+          <div className="mb-3 flex items-center gap-2 px-1 text-xs uppercase tracking-[0.24em] text-slate-500">
+            <MessageCircle className="h-4 w-4 text-cyan-300" />
+            <span>AI Chat History</span>
+          </div>
+
+          <div className="space-y-2 overflow-y-auto pr-1">
+            {chatHistory.map((chat) => {
+              const isActive = activeChatId === chat.id;
+              return (
+                <button
+                  key={chat.id}
+                  type="button"
+                  onClick={() => onSelectChat(chat.id)}
+                  className={`flex w-full flex-col gap-1 rounded-3xl border px-4 py-3 text-left transition-all duration-200 ${
+                    isActive
+                      ? 'border-cyan-400 bg-slate-900/95 shadow-soft'
+                      : 'border-slate-700/80 bg-slate-950/90 hover:border-cyan-400 hover:bg-slate-900/80'
+                  }`}
+                >
+                  <p className="truncate text-sm font-semibold text-slate-100">{chat.title}</p>
+                  <div className="flex items-center justify-between text-[11px] text-slate-500">
+                    <span className="truncate">{chat.snippet}</span>
+                    <Clock3 className="ml-2 h-3.5 w-3.5 text-slate-500" />
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default DocumentSidebar;

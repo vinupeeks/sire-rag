@@ -1,353 +1,198 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
-import { Send, Bot } from 'lucide-react';
-import { Loader2 } from 'lucide-react';
+import { Bot, Loader2, Send, User, Sparkles } from 'lucide-react';
+import { Button } from './ui/Button';
 
-const ChatPanel = ({ userId, chapterNumber }) => {
-    const [messages, setMessages] = useState([]);
-    const [input, setInput] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const messagesEndRef = useRef(null);
+const ChatPanel = ({ userId, chapterNumber, activeChat }) => {
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef(null);
 
-    // useEffect(() => {
-    //     setMessages([]);
-    // }, [chapterNumber]);
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isLoading]);
 
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages, isLoading]);
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (!input.trim() || isLoading) return;
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!input.trim() || isLoading) return;
+    const userQuestion = input.trim();
+    setInput('');
+    setMessages((prev) => [...prev, { role: 'user', text: userQuestion }, { role: 'loading' }]);
+    setIsLoading(true);
 
-        const userQuestion = input.trim();
-        setInput('');
-        // setMessages((prev) => [...prev, { role: 'user', text: userQuestion }]);
+    try {
+      const chatHistoryPayload = messages
+        .filter((message) => message.role !== 'loading')
+        .slice(-6)
+        .map((msg) => ({ role: msg.role, text: msg.text }));
+
+      const payload = {
+        question: userQuestion,
+        history: chatHistoryPayload,
+        user_id: Number(userId),
+      };
+
+      if (chapterNumber != null) {
+        payload.chapter_number = Number(chapterNumber);
+      }
+
+      const response = await axios.post('http://localhost:3003/api/rag/query', payload);
+
+      if (response.data.status && response.data.data) {
         setMessages((prev) => [
-            ...prev,
-            { role: 'user', text: userQuestion },
-            { role: 'loading' }
+          ...prev.filter((message) => message.role !== 'loading'),
+          {
+            role: 'model',
+            text: response.data.data.answer,
+            sources: [...new Set(response.data.data.sources || [])],
+          },
         ]);
-        setIsLoading(true);
+      } else {
+        setMessages((prev) => [
+          ...prev.filter((message) => message.role !== 'loading'),
+          {
+            role: 'model',
+            text: 'Unable to fetch an answer right now. Please try again later.',
+            isError: true,
+          },
+        ]);
+      }
+    } catch (error) {
+      console.error('RAG Query Failed:', error);
+      setMessages((prev) => [
+        ...prev.filter((message) => message.role !== 'loading'),
+        {
+          role: 'model',
+          text: 'Backend connection error. Verify your server is running and reachable.',
+          isError: true,
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-        try {
-            const chatHistoryPayload = messages.slice(-6).map((msg) => ({
-                role: msg.role,
-                text: msg.text,
-            }));
-
-            let payload = {
-                question: userQuestion,
-                history: chatHistoryPayload,
-                user_id: Number(userId)
-            };
-
-            if (chapterNumber != 0 && chapterNumber != null) {
-                payload.chapter_number = Number(chapterNumber);
-            }
-
-            console.log('Submitting RAG Query with Payload:', payload);
-
-            const response = await axios.post('http://localhost:3003/api/rag/query', payload);
-
-            if (response.data.status && response.data.data) {
-                setMessages((prev) => [
-                    ...prev.filter(msg => msg.role !== 'loading'),
-                    {
-                        role: 'model',
-                        text: response.data.data.answer,
-                        sources: [...new Set(response.data.data.sources || [])],
-                    },
-                ]);
-            }
-        } catch (error) {
-            console.error('RAG Query Failed:', error);
-            setMessages((prev) => [
-                ...prev.filter(msg => msg.role !== 'loading'),
-                {
-                    role: 'model',
-                    text: 'Backend Connection Timeout Error. Verify localized ports.',
-                    isError: true,
-                },
-            ]);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    return (
-        <div style={styles.chatWrapper}>
-            {/* Dynamic Header */}
-            <div style={styles.chatHeader}>
-                <h2 style={styles.headerTitle}></h2>
-                <p style={styles.headerSubtitle}>
-                    {/* Context Window Isolation: <span style={styles.badge}>Chapter Section {chapterNumber}</span> */}
-                </p>
+  return (
+    <div className="flex h-full flex-col overflow-hidden bg-slate-100 text-slate-900">
+      <div className="mx-auto flex h-full max-w-[1280px] flex-col px-4 py-5 sm:px-6 lg:px-8">
+        <div className="mb-4 rounded-[32px] border border-slate-200 bg-white p-6 shadow-soft">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-sm uppercase tracking-[0.3em] text-cyan-600/90">Solmarine Assistant</p>
+              <h1 className="mt-3 text-3xl font-semibold text-slate-950">AI Question Answering for shipping documents</h1>
             </div>
-
-            {/* Main Chat Stream Viewport Area */}
-            <div style={styles.viewport}>
-                {messages.length === 0 && (
-                    <div style={styles.emptyState}>
-                        <div style={styles.emptyIconContainer}>
-                            <Bot size={28} color="#2563eb" />
-                        </div>
-
-                        <h3 style={styles.emptyTitle}>
-                            How can I help you today?
-                        </h3>
-
-                        <p style={styles.emptyDesc}>
-                            Ask a question to get started. Answers are generated from your uploaded documents.
-                        </p>
-                    </div>
-                )}
-
-                {messages.map((msg, idx) => (
-                    msg?.role === 'loading' ? (
-                        <div key={idx} style={styles.msgRow}>
-                            <div style={styles.bubble}>
-                                <div style={styles.loadingContainer}>
-                                    <Loader2 size={18} className="spin" />
-                                    <span>Searching documents...</span>
-                                </div>
-                            </div>
-                        </div>
-                    ) : (
-                        <div
-                            key={idx}
-                            style={{
-                                ...styles.msgRow,
-                                justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start'
-                            }}
-                        >
-                            <div
-                                style={{
-                                    ...styles.bubble,
-                                    backgroundColor: msg.role === 'user' ? '#2563eb' : '#ffffff',
-                                    color: msg.role === 'user' ? '#ffffff' : '#0f172a',
-                                    borderRadius: msg.role === 'user'
-                                        ? '14px 14px 4px 14px'
-                                        : '4px 14px 14px 14px',
-                                    border: msg.role === 'user'
-                                        ? 'none'
-                                        : '1px solid #e2e8f0'
-                                }}
-                            >
-                                <div style={styles.bubbleText}>
-                                    {msg.role === 'user'
-                                        ? msg.text
-                                        : <ReactMarkdown>{msg.text}</ReactMarkdown>}
-                                </div>
-
-                                {msg.sources && msg.sources.length > 0 && (
-                                    <div
-                                        style={{
-                                            ...styles.sourcesBlock,
-                                            borderTop:
-                                                msg.role === 'user'
-                                                    ? '1px solid rgba(255,255,255,0.15)'
-                                                    : '1px solid #f1f5f9',
-                                            color:
-                                                msg.role === 'user'
-                                                    ? 'rgba(255,255,255,0.8)'
-                                                    : '#64748b'
-                                        }}
-                                    >
-                                        <strong>Sources:</strong> {[...new Set(msg.sources)].join(', ')}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    )
-                ))}
-
-                <div ref={messagesEndRef} />
+            <div className="rounded-3xl bg-slate-100 px-4 py-3 text-sm text-slate-700 shadow-sm">
+              {chapterNumber ? `Active chapter ${chapterNumber}` : 'Searching across all documents'}
             </div>
-
-            {/* Input Entry Box Frame */}
-            <div style={styles.footerContainer}>
-                <form onSubmit={handleSubmit} style={styles.formRow}>
-                    <input
-                        type="text"
-
-                        
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        placeholder={`Ask a question about your documents...`}
-                        style={styles.inputBox}
-                        disabled={isLoading}
-                    />
-                    <button type="submit" disabled={isLoading || !input.trim()} style={{
-                        ...styles.sendBtn,
-                        backgroundColor: (!input.trim() || isLoading) ? '#f1f5f9' : '#2563eb',
-                        color: (!input.trim() || isLoading) ? '#94a3b8' : '#ffffff',
-                    }}>
-                        <Send size={14} />
-                    </button>
-                </form>
-                <div style={styles.disclaimerContainer}>
-                    <Bot size={14} />
-                    <span>
-                        AI Assistant can make mistakes. Consider checking important info.
-                    </span>
-                </div>
-            </div>
+          </div>
+          <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-600">
+            Ask the AI anything about uploaded PDFs, cargo manifests, voyage plans, and maritime contracts. Relevant source references appear below each answer.
+          </p>
         </div>
-    );
-};
 
-const styles = {
-    chatWrapper: {
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        backgroundColor: '#f8fafc',
-    },
-    chatHeader: {
-        padding: '20px 24px',
-        backgroundColor: '#ffffff',
-        borderBottom: '1px solid #e2e8f0',
-    },
-    headerTitle: {
-        fontSize: '15px',
-        fontWeight: 700,
-        color: '#0f172a',
-        margin: 0,
-    },
-    headerSubtitle: {
-        fontSize: '12px',
-        color: '#64748b',
-        marginTop: '4px',
-        marginBottom: 0,
-    },
-    badge: {
-        color: '#2563eb',
-        fontWeight: 600,
-        backgroundColor: '#eff6ff',
-        padding: '1px 5px',
-        borderRadius: '4px'
-    },
-    viewport: {
-        flex: 1,
-        padding: '24px',
-        overflowY: 'auto',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '16px',
-    },
-    emptyState: {
-        margin: 'auto',
-        textAlign: 'center',
-        maxWidth: '360px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center'
-    },
-    emptyIconContainer: {
-        padding: '12px',
-        backgroundColor: '#eff6ff',
-        borderRadius: '12px',
-        marginBottom: '12px'
-    },
-    emptyTitle: {
-        fontSize: '15px',
-        fontWeight: 600,
-        color: '#0f172a',
-        margin: '0 0 6px 0'
-    },
-    emptyDesc: {
-        fontSize: '13px',
-        color: '#64748b',
-        margin: 0,
-        lineHeight: '1.5'
-    },
-    msgRow: {
-        display: 'flex',
-        width: '100%',
-    },
+        <div className="flex-1 overflow-hidden rounded-[32px] border border-slate-200 bg-slate-50 shadow-soft">
+          <div className="h-full min-h-[420px] overflow-y-auto px-5 py-6 sm:px-7 sm:py-7">
+            {messages.length === 0 && (
+              <div className="flex min-h-[420px] flex-col items-center justify-center rounded-[28px] border border-dashed border-slate-200 bg-white/90 px-8 py-12 text-center text-slate-600">
+                <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-3xl bg-cyan-600/10 text-cyan-600 shadow-lg shadow-cyan-500/10">
+                  <Bot className="h-7 w-7" />
+                </div>
+                <h2 className="text-xl font-semibold text-slate-900">Ask your shipping assistant</h2>
+                <p className="mt-3 max-w-xl text-sm text-slate-600">
+                  Upload cargo manifests, charter agreements, and vessel reports to get fast question answering with document sources.
+                </p>
+              </div>
+            )}
 
-    loadingBubble: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '4px',
-        padding: '8px 0'
-    },
-    dot: {
-        width: '8px',
-        height: '8px',
-        borderRadius: '50%',
-        backgroundColor: '#64748b',
-        animation: 'bounce 1.4s infinite ease-in-out'
-    },
-    loadingContainer: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        color: '#64748b',
-        fontSize: '13px',
-    },
+            {messages.map((msg, index) => {
+              if (msg.role === 'loading') {
+                return (
+                  <div key={index} className="mb-4 flex min-h-[80px] items-center gap-4 rounded-[28px] border border-slate-200 bg-white px-5 py-4 shadow-sm">
+                    <Loader2 className="h-5 w-5 animate-spin text-cyan-600" />
+                    <div>
+                      <p className="text-sm font-medium text-slate-900">Searching documents...</p>
+                      <p className="mt-1 text-sm text-slate-500">Your assistant is finding the best answer from uploaded PDFs.</p>
+                    </div>
+                  </div>
+                );
+              }
 
-    bubble: {
-        maxWidth: '80%',
-        padding: '12px 16px',
-        fontSize: '14px',
-        lineHeight: '1.55',
-        boxShadow: '0 1px 2px rgba(0,0,0,0.02)'
-    },
-    bubbleText: {
-        wordBreak: 'break-word',
-        textAlign: 'left',
-    },
-    sourcesBlock: {
-        marginTop: '10px',
-        paddingTop: '6px',
-        fontSize: '11px',
-        textAlign: 'left',
-    },
-    footerContainer: {
-        padding: '5px 24px',
-        backgroundColor: '#ffffff',
-        borderTop: '1px solid #e2e8f0',
-    },
-    formRow: {
-        display: 'flex',
-        gap: '10px',
-    },
-    inputBox: {
-        flex: 1,
-        padding: '12px 16px',
-        borderRadius: '8px',
-        border: '1px solid #cbd5e1',
-        outline: 'none',
-        fontSize: '14px',
-        backgroundColor: '#ffffff',
-        color: '#0f172a',
-    },
-    sendBtn: {
-        padding: '0 16px',
-        borderRadius: '8px',
-        border: 'none',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    disclaimerContainer: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '8px',
-        padding: '5px 5px',
-        fontSize: '12px',
-        color: '#64748b',
-        backgroundColor: '#f8fafc',
-        borderTop: '1px solid #e2e8f0',
-        textAlign: 'center',
-        lineHeight: '1.4',
-    },
+              const isUser = msg.role === 'user';
+              return (
+                <div key={index} className={`mb-4 flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[88%] rounded-[28px] border px-5 py-4 shadow-sm ${
+                    isUser
+                      ? 'border-cyan-500/20 bg-cyan-600 text-white'
+                      : 'border-slate-200 bg-white text-slate-900'
+                  }`}>
+                    <div className="mb-3 flex items-center gap-3">
+                      <div className={`flex h-9 w-9 items-center justify-center rounded-2xl ${
+                        isUser ? 'bg-cyan-500/20 text-cyan-100' : 'bg-slate-100 text-slate-700'
+                      }`}>
+                        {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
+                      </div>
+                      <p className={`text-xs uppercase tracking-[0.2em] ${isUser ? 'text-cyan-100' : 'text-slate-500'}`}>
+                        {isUser ? 'You' : 'Solmarine AI'}
+                      </p>
+                    </div>
+
+                    {isUser ? (
+                      <p className="whitespace-pre-wrap text-sm leading-7">{msg.text}</p>
+                    ) : (
+                    <div className="max-w-none text-slate-900">
+                        <ReactMarkdown>{msg.text}</ReactMarkdown>
+                      </div>
+                    )}
+
+                    {!isUser && msg.sources?.length > 0 && (
+                      <div className="mt-5 rounded-3xl bg-slate-50 px-4 py-3 text-sm text-slate-600 shadow-inner shadow-slate-200">
+                        <p className="font-semibold text-slate-900">Sources</p>
+                        <p className="mt-2 truncate">{msg.sources.join(', ')}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+
+            <div ref={messagesEndRef} />
+          </div>
+
+          <div className="border-t border-slate-200 bg-slate-50 px-5 py-5 sm:px-7">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <input
+                value={input}
+                onChange={(event) => setInput(event.target.value)}
+                placeholder="Ask a question about your documents..."
+                disabled={isLoading}
+                className="flex-1 rounded-3xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200"
+              />
+              <Button type="submit" disabled={isLoading || !input.trim()} className="w-full sm:w-auto" variant="primary">
+                {isLoading ? (
+                  <span className="inline-flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Searching...
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-2">
+                    Send
+                    <Send className="h-4 w-4" />
+                  </span>
+                )}
+              </Button>
+            </form>
+            <div className="mt-4 flex items-center gap-2 text-sm text-slate-500">
+              <Sparkles className="h-4 w-4 text-cyan-500" />
+              <p>Sources help you verify AI responses. Always cross-check important shipping details.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default ChatPanel;

@@ -1,6 +1,6 @@
 const LayoutShell = ({ left, main, right, leftCollapsed = false, rightCollapsed = false }) => {
   const leftWidthClass = leftCollapsed ? 'md:w-[88px] lg:w-[88px]' : 'md:w-[280px] lg:w-[320px]';
-  const rightWidthClass = rightCollapsed ? 'lg:w-[88px] xl:w-[88px]' : 'lg:w-[320px] xl:w-[360px]';
+  const rightWidthClass = rightCollapsed ? 'lg:w-[58px] xl:w-[58px]' : 'lg:w-[290px] xl:w-[330px]';
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900">

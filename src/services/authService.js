@@ -5,7 +5,7 @@ export const signIn = async ({ email, password }) => {
 
   return {
     id: 'user-1',
-    name: 'Solmarine User',
+    name: 'User Name',
     email,
     token: 'solmarine-token',
   };

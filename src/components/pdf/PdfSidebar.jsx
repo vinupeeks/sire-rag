@@ -38,8 +38,8 @@ const PdfSidebar = ({
 
                     {!collapsed && (
                         <div className="min-w-0 flex-1">
-                            <p className="truncate text-xs font-semibold leading-tight sm:text-sm">PDF Manager</p>
-                            <p className="truncate text-[10px] text-slate-500 leading-tight sm:text-xs">Upload and review</p>
+                            <p className="truncate text-xs font-semibold leading-tight sm:text-sm">Upload</p>
+                            <p className="truncate text-[10px] text-slate-500 leading-tight sm:text-xs">Upload and manage files</p>
                         </div>
                     )}
 
@@ -67,14 +67,14 @@ const PdfSidebar = ({
                     <Input
                         value={searchTerm}
                         onChange={(event) => onSearch(event.target.value)}
-                        placeholder="Search PDFs"
-                        className="text-xs sm:text-sm"
+                        placeholder="Search Files..."
+                        className="text-xs sm:text-sm h-8 sm:h-9"
                     />
                     <div className="rounded-2xl border border-slate-800/80 bg-slate-900/80 p-1.5 sm:p-2">
                         <label className="flex min-h-[2.25rem] cursor-pointer items-center justify-between gap-2 rounded-2xl bg-cyan-500/15 px-2 py-1.5 text-xs text-cyan-200 transition hover:bg-cyan-500/20 sm:py-2">
                             <span className="inline-flex items-center gap-2">
                                 <Upload className="h-3.5 w-3.5 flex-shrink-0 sm:h-4 sm:w-4" />
-                                <span className="text-xs sm:text-sm">Upload PDF</span>
+                                <span className="text-xs sm:text-sm">Upload Files</span>
                             </span>
                             <input ref={fileInputRef} type="file" accept=".pdf" className="hidden" onChange={handleFileChange} />
                         </label>
@@ -105,10 +105,10 @@ const PdfSidebar = ({
                                         {!collapsed && (
                                             <div className="min-w-0 flex-1">
                                                 <p className="truncate text-xs font-medium leading-tight text-slate-100">{pdf.fileName}</p>
-                                                <p className="truncate text-[10px] text-slate-500 leading-tight">
+                                                {/* <p className="truncate text-[10px] text-slate-500 leading-tight">
                                                     Ch {pdf.chapterNumber} � {statusLabel}
                                                 </p>
-                                                {chunkLabel && <p className="truncate text-[10px] text-slate-400 leading-tight">{chunkLabel}</p>}
+                                                {chunkLabel && <p className="truncate text-[10px] text-slate-400 leading-tight">{chunkLabel}</p>} */}
                                             </div>
                                         )}
                                     </div>

@@ -22,7 +22,7 @@ const Sidebar = ({
                     {!collapsed && (
                         <div className="min-w-0 flex-1">
                             <p className="truncate text-xs font-semibold leading-tight sm:text-sm">SMS</p>
-                            <p className="truncate text-[10px] text-slate-400 leading-tight sm:text-xs">AI assistant</p>
+                            <p className="truncate text-[10px] text-slate-400 leading-tight sm:text-xs">AI Search</p>
                         </div>
                     )}
 

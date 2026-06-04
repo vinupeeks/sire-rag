@@ -1,9 +1,23 @@
+import { useEffect, useRef } from 'react';
 import { Loader2, Sparkles, FileText } from 'lucide-react';
 import MessageBubble from './MessageBubble';
 import ChatInput from './ChatInput';
 
 const ChatArea = ({ conversation, isLoading, onSend }) => {
     const messages = conversation?.messages || [];
+
+    // Create a DOM anchor reference at the bottom of the container
+    const messagesEndRef = useRef(null);
+
+    // Auto-scroll function with standard smooth rendering behavior
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    // Watch for new messages or state alterations to trigger the scroll action
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages, isLoading]);
 
     return (
         <div className="flex h-full flex-col bg-[#c8d8e4] text-slate-800">
@@ -21,7 +35,7 @@ const ChatArea = ({ conversation, isLoading, onSend }) => {
                             </h2>
 
                             <p className="truncate text-[10px] text-cyan-600 font-bold tracking-wider uppercase sm:text-xs">
-                                DEEP-DATA DOCUMENT ASSISTANT
+                                DEEP-DATA FILE ASSISTANT
                             </p>
                         </div>
                     </div>
@@ -50,27 +64,26 @@ const ChatArea = ({ conversation, isLoading, onSend }) => {
                                 </h2>
 
                                 <p className="mt-2 text-xs text-slate-500 leading-relaxed max-w-md mx-auto sm:mt-3 sm:text-sm">
-                                    Upload PDFs and get instant answers, summaries, explanations, and source-backed responses.
+                                    Upload files and get instant answers, summaries, explanations, and source-backed responses.
                                 </p>
 
                                 <div className="mt-6 flex flex-col gap-2 justify-center items-center sm:flex-row sm:flex-wrap sm:gap-2.5">
                                     {[
-                                        'Summarize this PDF',
-                                        'Explain this chapter',
-                                        'Find key procedures',
+                                        'Summarize documents',
+                                        'Extract key information',
                                     ].map((item) => (
-                                        <button
+                                        <span
                                             key={item}
                                             className="w-full sm:w-auto rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-600 transition-all duration-200 hover:border-cyan-400 hover:bg-cyan-50/40 hover:text-cyan-700 active:scale-[0.98] shadow-sm"
                                         >
                                             {item}
-                                        </button>
+                                        </span>
                                     ))}
                                 </div>
 
                                 <div className="mt-6 inline-flex items-center gap-2 rounded-xl bg-slate-200/80 px-3.5 py-2 text-xs font-medium text-slate-600">
                                     <FileText className="h-3.5 w-3.5 text-slate-500" />
-                                    <span>Upload a PDF to get started</span>
+                                    <span>Upload a file to get started</span>
                                 </div>
                             </div>
                         </div>
@@ -82,6 +95,23 @@ const ChatArea = ({ conversation, isLoading, onSend }) => {
                                     message={message}
                                 />
                             ))}
+                            
+                                {isLoading && (() => {
+                                    const lastUserMessage = [...messages].reverse().find(m => m.role === 'user')?.text?.trim().toLowerCase() || '';
+                                    const greetings = /^(hi|hello|hey|hy|good\s*morning|good\s*afternoon|good\s*evening|helo|hii|hola)$/;
+                                    const closures = /^(thank\s*you|thanks|thank\s*you\s*so\s*much|ty|bye|goodbye|awesome|perfect)$/;
+
+                                    if (!greetings.test(lastUserMessage) && !closures.test(lastUserMessage)) {
+                                        return (
+                                            <MessageBubble
+                                                message={{ role: 'assistant', text: '', isPlaceholderLoader: true }}
+                                            />
+                                        );
+                                    }
+                                    return null;
+                                })()}
+
+                            <div ref={messagesEndRef} />
                         </div>
                     )}
                 </div>

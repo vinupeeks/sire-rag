@@ -18,7 +18,7 @@ const ChatInput = ({ disabled, onSend }) => {
       <Input
         value={value}
         onChange={(event) => setValue(event.target.value)}
-        placeholder="Ask a question about your documents..."
+        placeholder="Ask anything about your documents..."
         disabled={disabled}
         className="text-xs sm:text-sm"
       />

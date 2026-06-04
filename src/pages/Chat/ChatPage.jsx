@@ -175,7 +175,11 @@ const ChatPage = () => {
 
     const main = (
         <div className="flex h-screen flex-col">
-            <ChatArea conversation={activeConversation} isLoading={isChatLoading} onSend={handleSendMessage} />
+            <ChatArea
+                conversation={activeConversation}
+                isLoading={isChatLoading}
+                onSend={handleSendMessage}
+            />
         </div>
     );
 

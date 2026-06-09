@@ -1,115 +1,130 @@
-import { useEffect, useRef } from 'react';
-import { Loader2, Sparkles, FileText } from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
+import { Loader2, Sparkles } from 'lucide-react';
 import MessageBubble from './MessageBubble';
 import ChatInput from './ChatInput';
+import { useSelector } from 'react-redux';
 
 const ChatArea = ({ conversation, isLoading, onSend }) => {
     const messages = conversation?.messages || [];
-
-    // Create a DOM anchor reference at the bottom of the container
     const messagesEndRef = useRef(null);
 
-    // Auto-scroll function with standard smooth rendering behavior
+    const darkMode = useSelector((state) => state.data.darkMode);
+
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
-    // Watch for new messages or state alterations to trigger the scroll action
     useEffect(() => {
         scrollToBottom();
     }, [messages, isLoading]);
 
+    const theme = {
+        bg: darkMode ? 'bg-[#202938]' : 'bg-[#f4f7fa]',
+        textPrimary: darkMode ? 'text-slate-100' : 'text-slate-800',
+        textSecondary: darkMode ? 'text-slate-300' : 'text-slate-500',
+        border: darkMode ? 'border-slate-700/50' : 'border-[#e2e8f0]',
+
+        // Sticky Header / Nav
+        headerBg: darkMode ? 'bg-[#202938]/90 border-slate-700/50' : 'bg-[#f4f7fa]/90 border-[#e2e8f0]',
+        titleText: darkMode ? 'text-slate-100' : 'text-slate-900',
+
+        // Empty State Panels
+        sparklesIcon: darkMode ? 'from-sky-500 to-sky-600 shadow-sky-900/30' : 'from-sky-600 to-sky-700 shadow-sky-100',
+
+        // Input Wrapper panel background masking to completely block message scroll-under visibility
+        inputDockBg: darkMode ? 'bg-[#202938]' : 'bg-[#f4f7fa]',
+
+        // Consolidated Input Floating Panel
+        inputContainer: darkMode
+            ? 'border-slate-700/80 bg-[#273346] shadow-2xl shadow-slate-950/50 focus-within:border-sky-500/50'
+            : 'border-slate-200 bg-white shadow-xl shadow-slate-200/50 focus-within:border-sky-400/50',
+
+        // Status Indicators
+        loaderBadge: darkMode
+            ? 'border-sky-500/20 bg-sky-500/10 text-sky-400'
+            : 'border-sky-100 bg-sky-50/80 text-sky-700'
+    };
+
+    const hasNoHistory = messages.length === 0;
+
     return (
-        <div className="flex h-full flex-col bg-[#c8d8e4] text-slate-800">
+        <div className={`flex h-full flex-col overflow-hidden relative transition-all duration-300 ease-in-out ${theme.bg} ${theme.textPrimary}`}>
 
-            <div className="sticky top-0 z-10 border-b border-slate-200/80 bg-white/80 backdrop-blur-md">
-                <div className="mx-auto flex h-auto min-h-14 max-w-full flex-col gap-2 items-start justify-between px-3 py-2 sm:px-4 sm:py-3 md:flex-row md:items-center md:px-6 lg:max-w-full w-full">
-                    <div className="flex w-full items-center gap-2 sm:gap-3">
-                        <div className="relative h-2 w-2 flex-shrink-0 rounded-full bg-cyan-500 sm:h-2.5 sm:w-2.5">
-                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75"></span>
-                        </div>
-
+            {/* Header / Document Status Area */}
+            <div className={`sticky top-0 z-10 border-b backdrop-blur-md transition-colors duration-300 ${theme.headerBg}`}>
+                <div className="mx-auto flex h-auto min-h-[3.5rem] max-w-full items-center justify-between gap-3 px-4 py-2 md:px-6 w-full">
+                    <div className="flex w-full items-center gap-2.5 sm:gap-3">
                         <div className="min-w-0 flex-1">
-                            <h2 className="truncate text-xs font-semibold text-slate-900 sm:text-sm tracking-tight">
+                            <h2 className={`truncate text-xs font-bold sm:text-sm tracking-tight ${theme.titleText}`}>
                                 {conversation?.title || 'Workspace conversation'}
                             </h2>
-
-                            <p className="truncate text-[10px] text-cyan-600 font-bold tracking-wider uppercase sm:text-xs">
-                                DEEP-DATA FILE ASSISTANT
-                            </p>
                         </div>
                     </div>
 
                     {isLoading && (
-                        <div className="flex flex-shrink-0 items-center gap-2 rounded-full border border-cyan-100 bg-cyan-50/80 px-2.5 py-1 text-[10px] font-medium text-cyan-700 sm:px-3 sm:py-1.5 sm:text-xs">
-                            <Loader2 className="h-3 w-3 flex-shrink-0 animate-spin text-cyan-500 sm:h-3.5 sm:w-3.5" />
-                            <span className="hidden sm:inline">Pinging...</span>
+                        <div className={`flex flex-shrink-0 items-center gap-2 rounded-full border px-2.5 py-1 text-[10px] font-medium sm:px-3 sm:py-1.5 sm:text-xs transition-all ${theme.loaderBadge}`}>
+                            <Loader2 className="h-3 w-3 flex-shrink-0 animate-spin sm:h-3.5 sm:w-3.5" />
+                            <span className="hidden sm:inline">Loading...</span>
                             <span className="sm:hidden">Loading</span>
                         </div>
                     )}
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto">
-                <div className="mx-auto flex min-h-full w-full flex-col py-4 px-4 sm:px-6 md:px-8 lg:max-w-full">
-                    {messages.length === 0 ? (
-                        <div className="flex flex-1 items-center justify-center">
-                            <div className="w-full max-w-2xl px-4 text-center">
-                                <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500 to-cyan-600 text-white shadow-md shadow-cyan-100 sm:mb-6 sm:h-16 sm:w-16">
-                                    <Sparkles className="h-6 w-6 sm:h-7 sm:w-7" />
-                                </div>
+            {/* Chat Messages / Viewport Framework */}
+            <div className="flex-1 overflow-y-auto relative">
+                <div className={`mx-auto flex w-full flex-col px-4 py-6 sm:px-6 md:px-8 ${hasNoHistory ? 'h-full justify-center items-center' : 'min-h-full'}`}>
 
-                                <h2 className="text-lg font-bold text-slate-900 tracking-tight sm:text-2xl">
-                                    Ask questions about your documents
-                                </h2>
+                    {hasNoHistory ? (
+                        /* Empty State Container */
+                        <div className="flex flex-col items-center justify-center w-full max-w-4xl mx-auto text-center project-empty-state-view">
+                            <div className={`mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-lg transition-all sm:h-20 sm:w-20 ${theme.sparklesIcon}`}>
+                                <Sparkles className="h-7 w-7 sm:h-9 sm:w-9" />
+                            </div>
 
-                                <p className="mt-2 text-xs text-slate-500 leading-relaxed max-w-md mx-auto sm:mt-3 sm:text-sm">
-                                    Upload files and get instant answers, summaries, explanations, and source-backed responses.
-                                </p>
+                            <h2 className={`text-xl font-bold tracking-tight sm:text-3xl ${theme.titleText} mb-10`}>
+                                What would you like to know from your SMS?
+                            </h2>
 
-                                <div className="mt-6 flex flex-col gap-2 justify-center items-center sm:flex-row sm:flex-wrap sm:gap-2.5">
-                                    {[
-                                        'Summarize documents',
-                                        'Extract key information',
-                                    ].map((item) => (
-                                        <span
-                                            key={item}
-                                            className="w-full sm:w-auto rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-600 transition-all duration-200 hover:border-cyan-400 hover:bg-cyan-50/40 hover:text-cyan-700 active:scale-[0.98] shadow-sm"
-                                        >
-                                            {item}
-                                        </span>
-                                    ))}
-                                </div>
-
-                                <div className="mt-6 inline-flex items-center gap-2 rounded-xl bg-slate-200/80 px-3.5 py-2 text-xs font-medium text-slate-600">
-                                    <FileText className="h-3.5 w-3.5 text-slate-500" />
-                                    <span>Upload a file to get started</span>
+                            {/* Main Input Field Area - Large centered panel display */}
+                            <div className="w-full max-w-4xl mx-auto px-4">
+                                <div className={`rounded-2xl border p-2.5 transition-all duration-300 ${theme.inputContainer}`}>
+                                    <ChatInput
+                                        disabled={isLoading}
+                                        onSend={onSend}
+                                        darkMode={darkMode}
+                                        className="py-3 px-4 text-base"
+                                    />
                                 </div>
                             </div>
                         </div>
                     ) : (
-                        <div className="mx-auto w-full max-w-full space-y-6">
+                        /* Chat History List Frame View */
+                        <div className="mx-auto w-full max-w-4xl space-y-6 pb-6">
                             {messages.map((message, index) => (
                                 <MessageBubble
                                     key={`${message.role}-${index}`}
                                     message={message}
+                                    darkMode={darkMode}
                                 />
                             ))}
-                            
-                                {isLoading && (() => {
-                                    const lastUserMessage = [...messages].reverse().find(m => m.role === 'user')?.text?.trim().toLowerCase() || '';
-                                    const greetings = /^(hi|hello|hey|hy|good\s*morning|good\s*afternoon|good\s*evening|helo|hii|hola)$/;
-                                    const closures = /^(thank\s*you|thanks|thank\s*you\s*so\s*much|ty|bye|goodbye|awesome|perfect)$/;
 
-                                    if (!greetings.test(lastUserMessage) && !closures.test(lastUserMessage)) {
-                                        return (
-                                            <MessageBubble
-                                                message={{ role: 'assistant', text: '', isPlaceholderLoader: true }}
-                                            />
-                                        );
-                                    }
-                                    return null;
-                                })()}
+                            {isLoading && (() => {
+                                const lastUserMessage = [...messages].reverse().find(m => m.role === 'user')?.text?.trim().toLowerCase() || '';
+                                const greetings = /^(hi|hello|hey|hy|good\s*morning|good\s*afternoon|good\s*evening|helo|hii|hola)$/;
+                                const closures = /^(thank\s*you|thanks|thank\s*you\s*so\s*much|ty|bye|goodbye|awesome|perfect)$/;
+
+                                if (!greetings.test(lastUserMessage) && !closures.test(lastUserMessage)) {
+                                    return (
+                                        <MessageBubble
+                                            key="loader-bubble"
+                                            message={{ role: 'assistant', text: '', isPlaceholderLoader: true }}
+                                            darkMode={darkMode}
+                                        />
+                                    );
+                                }
+                                return null;
+                            })()}
 
                             <div ref={messagesEndRef} />
                         </div>
@@ -117,16 +132,22 @@ const ChatArea = ({ conversation, isLoading, onSend }) => {
                 </div>
             </div>
 
-            <div className="sticky bottom-0 border-t border-slate-200/60 bg-[#c8d8e4] backdrop-blur-md">
-                <div className="mx-auto w-full flex-shrink-0 px-4 py-3 md:px-8 lg:max-w-full">
-                    <div className="rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-xl shadow-slate-200/30 focus-within:border-cyan-400/50 transition-all duration-300">
-                        <ChatInput
-                            disabled={isLoading}
-                            onSend={onSend}
-                        />
+            {/* Sticky Masked Bottom Input Bar - Blocks chat bubbles from dropping down beneath input background borders */}
+            {!hasNoHistory && (
+                <div className={`sticky bottom-0 z-20 w-full pt-2 pb-6 px-4 transition-colors duration-300 ${theme.inputDockBg}`}>
+                    <div className="mx-auto w-full max-w-4xl">
+                        <div className={`rounded-2xl border p-2.5 transition-all duration-300 ${theme.inputContainer}`}>
+                            <ChatInput
+                                disabled={isLoading}
+                                onSend={onSend}
+                                darkMode={darkMode}
+                                className="py-3 px-4 text-base"
+                            />
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
+
         </div>
     );
 };

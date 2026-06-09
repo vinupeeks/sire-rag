@@ -1,0 +1,33 @@
+import { configureStore } from '@reduxjs/toolkit';
+import { persistStore, persistReducer } from 'redux-persist';
+import rootReducer from './reducers';
+import { userApi } from './services/userApi.js';
+import { smsApi } from './services/smsApi.js';
+
+import storageModule from 'redux-persist/lib/storage';
+const storage = storageModule.default || storageModule;
+
+const persistConfig = {
+    key: 'root',
+    storage,
+    blacklist: [
+        'pagination',
+        userApi.reducerPath,
+        smsApi.reducerPath,
+    ],
+};
+
+console.log("storage =", storage);
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
+export const store = configureStore({
+    reducer: persistedReducer,
+    middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware({
+            serializableCheck: false,
+        })
+            .concat(userApi.middleware)
+            .concat(smsApi.middleware),
+});
+
+export const persistor = persistStore(store);

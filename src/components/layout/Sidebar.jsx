@@ -17,7 +17,7 @@ const Sidebar = ({
     const dispatch = useDispatch();
     const darkMode = useSelector((state) => state.data.darkMode);
     const user = useSelector((state) => state.auth.user);
-   
+
     const handleThemeToggle = () => {
         dispatch(toggleDarkMode());
     };
@@ -76,7 +76,7 @@ const Sidebar = ({
                         {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                     </Button> */}
 
-                    
+
                     <div className="flex h-7 w-20 items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-300 to-blue-300 shadow-lg p-2 flex-shrink-0">
                         <img
                             src={Logo}
@@ -210,12 +210,15 @@ const Sidebar = ({
                         <Button
                             variant="ghost"
                             size="icon"
+                            onClick={handleThemeToggle}
                             className={`flex-shrink-0 h-7 w-7 rounded-lg ${darkMode
                                 ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-700'
                                 : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
                                 }`}
+                            title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
                         >
-                            <Settings className="h-3.5 w-3.5" />
+                            {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                            {/* <Settings className="h-3.5 w-3.5" /> */}
                         </Button>
                     </div>
                 ) : (

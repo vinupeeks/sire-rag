@@ -1,6 +1,7 @@
 import ReactMarkdown from 'react-markdown';
 import { Bot, User, FileText, Loader2, X, Copy } from 'lucide-react';
-import { useEffect, useState, useMemo } from 'react'; // Added useMemo hook helper
+import { useEffect, useState, useMemo } from 'react';
+import { toast } from "sonner";
 import remarkGfm from 'remark-gfm';
 import { BASEURL } from '../../config/config';
 
@@ -43,6 +44,17 @@ const MessageBubble = ({ message, isDarkMode = true }) => {
 
         return () => clearInterval(interval);
     }, [message?.isPlaceholderLoader]);
+
+    const handleCopy = async (text) => {
+        await navigator.clipboard.writeText(text);
+        toast.success("Response copied", {
+            style: {
+                background: "#567aa7",
+                color: "#fff",
+                border: "1px solid #15803d",
+            },
+        });
+    };
 
     const theme = {
         bubbleStyle: isUser
@@ -95,7 +107,8 @@ const MessageBubble = ({ message, isDarkMode = true }) => {
 
                     {!isUser && !message?.isPlaceholderLoader && message?.sources[0] != 'System Assistant' && (
                         <button
-                            onClick={() => navigator.clipboard.writeText(message?.text)}
+                            onClick={() => handleCopy(message?.text)}
+                            // onClick={() => navigator.clipboard.writeText(message?.text)}
                             className="text-slate-400 hover:text-slate-600 transition-colors"
                             title="Copy response"
                         >

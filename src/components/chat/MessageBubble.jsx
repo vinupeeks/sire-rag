@@ -1,5 +1,5 @@
 import ReactMarkdown from 'react-markdown';
-import { Bot, User, FileText, Loader2, X } from 'lucide-react';
+import { Bot, User, FileText, Loader2, X, Copy } from 'lucide-react';
 import { useEffect, useState, useMemo } from 'react'; // Added useMemo hook helper
 import remarkGfm from 'remark-gfm';
 import { BASEURL } from '../../config/config';
@@ -82,13 +82,27 @@ const MessageBubble = ({ message, isDarkMode = true }) => {
             <div className={`rounded-2xl border px-4 py-3.5 transition-all duration-200 ${theme.bubbleStyle}`}>
 
                 {/* Meta Header */}
-                <div className="mb-2.5 flex items-center gap-2.5">
-                    <div className={`flex h-6 w-6 items-center justify-center rounded-lg transition-colors ${theme.badgeBg}`}>
-                        {isUser ? <User className="h-3.5 w-3.5" /> : <Bot className="h-3.5 w-3.5" />}
+                <div className="mb-2.5 flex items-center justify-between">
+
+                    <div className="flex items-center gap-2.5">
+                        <div className={`flex h-6 w-6 items-center justify-center rounded-lg transition-colors ${theme.badgeBg}`}>
+                            {isUser ? <User className="h-3.5 w-3.5" /> : <Bot className="h-3.5 w-3.5" />}
+                        </div>
+                        <p className={`text-[10px] font-bold uppercase tracking-wider ${theme.badgeText}`}>
+                            {isUser ? 'You' : 'SMS-Search Assistant'}
+                        </p>
                     </div>
-                    <p className={`text-[10px] font-bold uppercase tracking-wider ${theme.badgeText}`}>
-                        {isUser ? 'You' : 'SMS-Search Assistant'}
-                    </p>
+
+                    {!isUser && !message?.isPlaceholderLoader && message?.sources[0] != 'System Assistant' && (
+                        <button
+                            onClick={() => navigator.clipboard.writeText(message?.text)}
+                            className="text-slate-400 hover:text-slate-600 transition-colors"
+                            title="Copy response"
+                        >
+                            <Copy className="h-4 w-4" />
+                        </button>
+                    )}
+
                 </div>
 
                 {/* Main Text Markdown Node */}

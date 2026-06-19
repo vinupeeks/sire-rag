@@ -45,15 +45,43 @@ const MessageBubble = ({ message, isDarkMode = true }) => {
         return () => clearInterval(interval);
     }, [message?.isPlaceholderLoader]);
 
-    const handleCopy = async (text) => {
-        await navigator.clipboard.writeText(text);
-        toast.success("Response copied", {
-            style: {
-                background: "#567aa7",
-                color: "#fff",
-                border: "1px solid #15803d",
-            },
-        });
+    // const handleCopy = async (text) => {
+    //     await navigator.clipboard.writeText(text);
+    //     toast.success("Response copied", {
+    //         style: {
+    //             background: "#567aa7",
+    //             color: "#fff",
+    //             border: "1px solid #15803d",
+    //         },
+    //     });
+    // };
+
+    const handleCopy = async (message) => {
+        const stripMarkdown = (md) => {
+            if (!md) return '';
+            return md
+                .replace(/^>\s*/gm, '')
+                .replace(/^#{1,6}\s+/gm, '')
+                .replace(/\*{1,3}/g, '')
+                .replace(/_{1,3}/g, '')
+                .replace(/`/g, '')
+                .replace(/^[\s]*[*+-]\s+/gm, '• ');
+        };
+
+        const cleanText = stripMarkdown(message?.text);
+
+        try {
+            await navigator.clipboard.writeText(cleanText);
+            toast.success("Response copied", {
+                style: {
+                    background: "#567aa7",
+                    color: "#fff",
+                    border: "1px solid #15803d",
+                },
+            });
+        } catch (err) {
+            console.error("Failed to copy text: ", err);
+        }
     };
 
     const theme = {
@@ -107,7 +135,7 @@ const MessageBubble = ({ message, isDarkMode = true }) => {
 
                     {!isUser && !message?.isPlaceholderLoader && message?.sources[0] != 'System Assistant' && (
                         <button
-                            onClick={() => handleCopy(message?.text)}
+                            onClick={() => handleCopy(message)}
                             // onClick={() => navigator.clipboard.writeText(message?.text)}
                             className="text-slate-400 hover:text-slate-600 transition-colors"
                             title="Copy response"

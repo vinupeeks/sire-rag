@@ -54,9 +54,9 @@ const LoginPage = () => {
       <div className="absolute left-0 top-0 h-96 w-96 rounded-full bg-cyan-500/10 blur-3xl" />
       <div className="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-blue-500/10 blur-3xl" />
 
-      <div className="relative z-10 flex w-full">
+      <div className="relative z-10 flex w-[80%]">
         {/* Left Section */}
-        <div className="hidden w-1/2 flex-col justify-center px-16 xl:flex">
+        {/* <div className="hidden w-1/2 flex-col justify-center px-16 xl:flex">
           <div className="max-w-xl">
             <div className="mb-4 flex items-center gap-2">
               <div className="flex h-10 w-26 items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 shadow-lg p-2 flex-shrink-0">
@@ -71,9 +71,6 @@ const LoginPage = () => {
                 <h1 className="text-3xl font-bold text-white">
                   SMS Search
                 </h1>
-                {/* <p className="text-slate-400">
-                  Safety Management System
-                </p> */}
               </div>
             </div>
 
@@ -102,6 +99,39 @@ const LoginPage = () => {
                 </div>
               ))}
             </div>
+          </div>
+        </div> */}
+
+        <div className="hidden w-1/2 flex-col justify-center xl:flex ml-20">
+          <div className="max-w-2xl">
+            {/* ─── CHANGED: Switched to flex-col and gap-4 for vertical stack ─── */}
+            <div className="mb-4 flex flex-col items-start gap-4">
+              {/* Row 1: Logo */}
+              <div className="flex h-10 w-26 items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 shadow-lg p-2 flex-shrink-0">
+                <img
+                  src={Logo}
+                  alt="Logo"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+
+              {/* Row 2: Title */}
+              <div>
+                <h1 className="text-4xl font-bold text-white">
+                  Safety Management System Search
+                </h1>
+              </div>
+            </div>
+
+            {/* Row 3: Subtitle block */}
+            <h2 className="mb-2 text-2xl font-bold leading-tight text-white">
+              Operational Excellence
+              <span className="block bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                Through Knowledge
+              </span>
+            </h2>
+
+            {/* ... rest of your commented code elements ... */}
           </div>
         </div>
 
@@ -188,7 +218,7 @@ const LoginPage = () => {
                 disabled={isLoading}
                 className="h-12 w-full rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 font-medium text-white shadow-lg transition-all hover:scale-[1.01]"
               >
-                {isLoading ? 'Logging In...' : 'Log In'}
+                {isLoading ? 'Logging In...' : 'Login'}
               </Button>
             </form>
 

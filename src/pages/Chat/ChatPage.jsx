@@ -3,20 +3,22 @@ import { useNavigate } from 'react-router-dom';
 import LayoutShell from '../../components/layout/LayoutShell';
 import Sidebar from '../../components/layout/Sidebar';
 import ChatArea from '../../components/chat/ChatArea';
-import KnowledgeBaseView from '../../components/Files/KnowledgeBaseView'; // Import the new View
+import KnowledgeBaseView from '../../components/Files/KnowledgeBaseView';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../redux/reducers/authReducers';
-import { MessageSquare, FolderOpen } from 'lucide-react'; // Nav UI Icons
+import { MessageSquare, FolderOpen } from 'lucide-react';
+import { toast } from "sonner";
 import {
     useGetPdfListQuery,
     useUploadPdfMutation,
     useDeletePdfMutation,
     useQueryChatMutation,
 } from '../../redux/services/smsApi';
+import ConfirmationModal from '../../common/ConfirmationModal';
 
 const initialConversation = {
     id: 'conv-1',
-    title: 'Workspace conversation',
+    title: 'SMS conversation',
     description: 'Ask your AI assistant about uploaded documents.',
     updated: 'Now',
     messages: [],
@@ -28,13 +30,11 @@ const ChatPage = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    // Tab view management hook ('chat' | 'files')
     const [activeTab, setActiveTab] = useState('chat');
 
     const [uploadPdfMutation, { isLoading: isUploading }] = useUploadPdfMutation();
     const [deletePdfMutation] = useDeletePdfMutation();
     const [queryChatMutation] = useQueryChatMutation();
-
     const {
         data: pdfResponse,
         isLoading: isPdfLoading,
@@ -47,6 +47,12 @@ const ChatPage = () => {
     const [pdfSearch, setPdfSearch] = useState('');
     const [isChatLoading, setIsChatLoading] = useState(false);
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [confirmConfig, setConfirmConfig] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: () => { },
+    });
 
     const pdfs = pdfResponse?.data || [];
 
@@ -169,23 +175,46 @@ const ChatPage = () => {
         }
     };
 
-    const handleDeletePdf = async (data) => {
-        console.log(data);
-
-        try {
-            await deletePdfMutation({
-                user_id: Number(user?.id),
-                file_name: data?.fileName,
-            }).unwrap();
-            refetchPdfs();
-        } catch (error) {
-            console.error('Error deleting PDF:', error);
-        }
+    const handleDeletePdf = (data) => {
+        setConfirmConfig({
+            isOpen: true,
+            title: 'Delete Document',
+            message: `Are you sure you want to permanently delete "${data?.fileName}"? This action cannot be undone.`,
+            onConfirm: async () => {
+                try {
+                    await deletePdfMutation({
+                        user_id: Number(user?.id),
+                        file_name: data?.fileName,
+                    }).unwrap();
+                    refetchPdfs();
+                    
+                    toast.success("Document deleted", {
+                        style: {
+                            background: "#567aa7",
+                            color: "#fff",
+                            border: "1px solid #15803d",
+                        },
+                    });
+                } catch (error) {
+                    console.error('Error deleting PDF:', error);
+                } finally {
+                    setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+                }
+            }
+        });
     };
 
     const logoutFn = () => {
-        dispatch(logout());
-        navigate('/login');
+        setConfirmConfig({
+            isOpen: true,
+            title: 'Log Out',
+            message: 'Are you sure you want to log out of your account?',
+            onConfirm: () => {
+                dispatch(logout());
+                navigate('/login');
+                setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+            }
+        });
     };
 
     // Main workspace renderer wrapping both navigation headers and page contents
@@ -207,7 +236,7 @@ const ChatPage = () => {
                         }`}
                 >
                     <MessageSquare className="h-3.5 w-3.5" />
-                    Workspace Chat
+                    SMS Chat
                 </button>
                 <button
                     onClick={() => setActiveTab('files')}
@@ -248,24 +277,35 @@ const ChatPage = () => {
     );
 
     return (
-        <LayoutShell
-            leftCollapsed={sidebarCollapsed}
-            left={
-                <Sidebar
-                    collapsed={sidebarCollapsed}
-                    activeConversationId={activeConversationId}
-                    conversations={filteredConversations}
-                    searchTerm={conversationSearch}
-                    onSearch={setConversationSearch}
-                    onNewConversation={handleNewConversation}
-                    onSelectConversation={handleSelectConversation}
-                    logoutFn={logoutFn}
-                    user={user}
-                    onToggle={() => setSidebarCollapsed((prev) => !prev)}
-                />
-            }
-            main={mainWorkspaceContent}
-        />
+        <>
+            <LayoutShell
+                leftCollapsed={sidebarCollapsed}
+                left={
+                    <Sidebar
+                        collapsed={sidebarCollapsed}
+                        activeConversationId={activeConversationId}
+                        conversations={filteredConversations}
+                        searchTerm={conversationSearch}
+                        onSearch={setConversationSearch}
+                        onNewConversation={handleNewConversation}
+                        onSelectConversation={handleSelectConversation}
+                        logoutFn={logoutFn}
+                        user={user}
+                        onToggle={() => setSidebarCollapsed((prev) => !prev)}
+                    />
+                }
+                main={mainWorkspaceContent}
+            />
+
+            <ConfirmationModal
+                isOpen={confirmConfig.isOpen}
+                title={confirmConfig.title}
+                message={confirmConfig.message}
+                darkMode={darkMode}
+                onConfirm={confirmConfig.onConfirm}
+                onCancel={() => setConfirmConfig(prev => ({ ...prev, isOpen: false }))}
+            />
+        </>
     );
 };
 

@@ -56,7 +56,7 @@ const ChatArea = ({ conversation, isLoading, onSend }) => {
                     <div className="flex w-full items-center gap-2.5 sm:gap-3">
                         <div className="min-w-0 flex-1">
                             <h2 className={`truncate text-xs font-bold sm:text-sm tracking-tight ${theme.titleText}`}>
-                                {conversation?.title || 'Workspace conversation'}
+                                {conversation?.title || 'SMS conversation'}
                             </h2>
                         </div>
                     </div>

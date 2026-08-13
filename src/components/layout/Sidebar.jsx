@@ -13,6 +13,10 @@ const Sidebar = ({
     onSelectConversation,
     logoutFn,
     onToggle,
+    menuItems = [],
+    actionButtonLabel = 'New chat',
+    onMenuItemClick = () => { },
+    showConversations = true,
 }) => {
     const dispatch = useDispatch();
     const darkMode = useSelector((state) => state.data.darkMode);
@@ -22,7 +26,6 @@ const Sidebar = ({
         dispatch(toggleDarkMode());
     };
 
-    // Style Maps: Dark Mode is now a much softer, reduced mid-tone slate instead of an abyss/black
     const theme = {
         bg: darkMode ? 'bg-[#324057]' : 'bg-[#e9eff5]',
         // bg: darkMode ? 'bg-[#324057]' : 'bg-[#f4f7fa]',
@@ -62,20 +65,6 @@ const Sidebar = ({
             {/* Header Section */}
             <div className={`flex min-h-[3.5rem] items-center justify-between gap-2 border-b px-2 py-2 sm:gap-3 sm:px-1 ${theme.border}`}>
                 <div className="group relative flex items-center gap-2 sm:gap-2">
-                    {/* Dark/Light Mode Theme Toggle Switch Container */}
-                    {/* <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={handleThemeToggle}
-                        className={`h-8 w-8 rounded-xl flex-shrink-0 transition-all duration-200 border ${darkMode
-                            ? 'bg-amber-500/10 text-amber-400 border-amber-500/20 hover:bg-amber-500/20'
-                            : 'bg-indigo-500/10 text-indigo-600 border-indigo-200 hover:bg-indigo-500/20'
-                            }`}
-                        title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-                    >
-                        {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                    </Button> */}
-
 
                     <div className="flex h-7 w-20 items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-300 to-blue-300 shadow-lg p-2 flex-shrink-0">
                         <img
@@ -118,6 +107,29 @@ const Sidebar = ({
                 )}
             </div>
 
+            {/* Context-Specific Menu Items */}
+            {menuItems.length > 0 && !collapsed && (
+                <div className="px-2 py-2 border-b space-y-1">
+                    {menuItems.map((item) => (
+                        <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => onMenuItemClick(item.id)}
+                            className={`flex w-full items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wide transition-all ${
+                                item.isActive
+                                    ? `bg-[#0091ff] text-white shadow-sm shadow-[#0091ff]/20`
+                                    : darkMode
+                                        ? 'text-slate-300 hover:bg-[#273346] hover:text-slate-100'
+                                        : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900'
+                            }`}
+                        >
+                            {item.icon && <item.icon className="h-4 w-4 flex-shrink-0" />}
+                            <span>{item.label}</span>
+                        </button>
+                    ))}
+                </div>
+            )}
+
             {/* New Chat Action Layer */}
             {!collapsed ? (
                 <div className="px-3 py-3">
@@ -127,7 +139,7 @@ const Sidebar = ({
                         onClick={onNewConversation}
                     >
                         <Plus className="h-3.5 w-3.5 flex-shrink-0 sm:h-4 sm:w-4" />
-                        <span className="hidden sm:inline">New chat</span>
+                        <span className="hidden sm:inline">{actionButtonLabel}</span>
                         <span className="sm:hidden">New</span>
                     </Button>
                 </div>
@@ -145,41 +157,46 @@ const Sidebar = ({
             )}
 
             {/* Chat List Stream */}
-            <div className="flex-1 overflow-y-auto px-2 py-1">
-                <div className="space-y-1">
-                    {conversations.map((conversation) => {
-                        const active = conversation.id === activeConversationId;
-                        return (
-                            <button
-                                key={conversation.id}
-                                type="button"
-                                onClick={() => onSelectConversation(conversation.id)}
-                                className={`flex w-full min-h-[2.75rem] items-center gap-3 rounded-xl border relative px-3 py-2 text-left text-xs transition-all duration-200 group ${active ? theme.activeItem : theme.inactiveItem
-                                    } ${collapsed ? 'justify-center px-0' : ''}`}
-                            >
-                                {/* Left Active Bar Indicator */}
-                                {active && !collapsed && (
-                                    <div className={`absolute left-0 top-2.5 bottom-2.5 w-[3px] rounded-r-md ${darkMode ? 'bg-sky-400' : 'bg-sky-500'}`} />
-                                )}
+            {showConversations && (
+                <div className="flex-1 overflow-y-auto px-2 py-1">
+                    <div className="space-y-1">
+                        {conversations.map((conversation) => {
+                            const active = conversation.id === activeConversationId;
+                            return (
+                                <button
+                                    key={conversation.id}
+                                    type="button"
+                                    onClick={() => onSelectConversation(conversation.id)}
+                                    className={`flex w-full min-h-[2.75rem] items-center gap-3 rounded-xl border relative px-3 py-2 text-left text-xs transition-all duration-200 group ${active ? theme.activeItem : theme.inactiveItem
+                                        } ${collapsed ? 'justify-center px-0' : ''}`}
+                                >
+                                    {/* Left Active Bar Indicator */}
+                                    {active && !collapsed && (
+                                        <div className={`absolute left-0 top-2.5 bottom-2.5 w-[3px] rounded-r-md ${darkMode ? 'bg-sky-400' : 'bg-sky-500'}`} />
+                                    )}
 
-                                <div className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg text-[10px] font-bold border transition-colors ${active ? `${theme.avatarActive}` : `${theme.avatarInactive} ${darkMode ? 'border-slate-600/50' : 'border-slate-300/40'}`
-                                    }`}>
-                                    {conversation.title?.charAt(0).toUpperCase()}
-                                </div>
-
-                                {!collapsed && (
-                                    <div className="min-w-0 flex-1 pl-0.5">
-                                        <p className={`truncate text-xs font-medium leading-normal ${active ? 'font-bold' : ''}`}>
-                                            {conversation.title}
-                                        </p>
-                                        <p className={`truncate text-[10px] mt-0.5 ${theme.textTimestamp}`}>{conversation.updated}</p>
+                                    <div className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg text-[10px] font-bold border transition-colors ${active ? `${theme.avatarActive}` : `${theme.avatarInactive} ${darkMode ? 'border-slate-600/50' : 'border-slate-300/40'}`
+                                        }`}>
+                                        {conversation.title?.charAt(0).toUpperCase()}
                                     </div>
-                                )}
-                            </button>
-                        );
-                    })}
+
+                                    {!collapsed && (
+                                        <div className="min-w-0 flex-1 pl-0.5">
+                                            <p className={`truncate text-xs font-medium leading-normal ${active ? 'font-bold' : ''}`}>
+                                                {conversation.title}
+                                            </p>
+                                            <p className={`truncate text-[10px] mt-0.5 ${theme.textTimestamp}`}>{conversation.updated}</p>
+                                        </div>
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
                 </div>
-            </div>
+            )}
+            {!showConversations && (
+                <div className="flex-1 overflow-y-auto px-2 py-1" />
+            )}
 
             {/* Footer / Profile Information Block */}
             <div className={`border-t rounded-t-[24px] px-2 py-2 ${theme.border} ${theme.footerBg}`}>

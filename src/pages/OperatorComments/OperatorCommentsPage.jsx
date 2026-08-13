@@ -10,9 +10,19 @@ import {
     Wrench,
     ShieldCheck,
     BookOpen,
-    FileText
+    FileText,
+    Clipboard,
+    Clock,
+    CheckSquare,
+    MessageSquare as MessageIcon,
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import LayoutShell from '../../components/layout/LayoutShell';
+import Sidebar from '../../components/layout/Sidebar';
 import ToolTabs from '../../components/layout/ToolTabs';
+import ConfirmationModal from '../../common/ConfirmationModal';
+import { logout } from '../../redux/reducers/authReducers';
 import { useFetchMutation } from '../../redux/services/operatorCommentsApi';
 
 const categoryOptions = ["Process", "Human", "Hardware"];
@@ -34,18 +44,23 @@ const responseOptions = {
     ]
 };
 
-const ResultCard = ({ title, icon, content, colorClass }) => (
-    <div className="rounded-xl border border-slate-700/50 bg-[#111827] p-5 transition-all hover:border-slate-600/80">
+// Updated to accept darkMode prop for styling
+const ResultCard = ({ title, icon, content, colorClass, darkMode }) => (
+    <div className={`rounded-xl border p-5 transition-all ${darkMode ? 'border-slate-700/50 bg-[#111827] hover:border-slate-600/80' : 'border-slate-200 bg-white hover:border-slate-300 shadow-sm'}`}>
         <div className={`mb-3 flex items-center gap-2 ${colorClass}`}>
             {icon}
             <h3 className="font-semibold uppercase tracking-wide text-sm">{title}</h3>
         </div>
-        <p className="text-sm leading-relaxed text-slate-300">{content}</p>
+        <p className={`text-sm leading-relaxed ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>{content}</p>
     </div>
 );
 
 const OperatorCommentsPage = () => {
-    // Replaced 'login' with a more descriptive name for the mutation function
+    const user = useSelector((state) => state.auth.user);
+    const darkMode = useSelector((state) => state.data.darkMode);
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+
     const [submitComment, { isLoading }] = useFetchMutation();
 
     const [formData, setFormData] = useState({
@@ -57,6 +72,14 @@ const OperatorCommentsPage = () => {
 
     const [status, setStatus] = useState({ type: '', message: '' });
     const [apiResponse, setApiResponse] = useState(null);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [activeMenuItemId, setActiveMenuItemId] = useState('inspection-comments');
+    const [confirmConfig, setConfirmConfig] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: () => { },
+    });
 
     const handleInputChange = (field, value) => {
         setFormData((prev) => {
@@ -70,24 +93,11 @@ const OperatorCommentsPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        // if (!formData.category || !formData.responseType || !formData.comment || !formData.questionNo) {
-        //     setStatus({ type: 'error', message: 'Please fill in all fields.' });
-        //     return;
-        // }
-
         setStatus({ type: '', message: '' });
         setApiResponse(null);
 
         try {
-            // Execute the mutation and unwrap the result to catch errors properly
-            // const response = await submitComment({
-            //     category: formData.category,
-            //     comment: formData.comment,
-            //     question_number: formData.questionNo,
-            //     response_type: formData.responseType,
-            // }).unwrap();
-
+            // Mocking the response for demo purposes
             const response = {
                 "success": true,
                 "message": "Operator comment analyzed and saved successfully.",
@@ -111,43 +121,14 @@ const OperatorCommentsPage = () => {
                         "title": "4.3.2. Were the engineer officers familiar with the company procedures defining machinery space operating mode and, where required to be attended, "
                     },
                     "assumptions": [],
-                    "section_sources": [
-                        {
-                            "section": "Immediate Cause",
-                            "source_refs": [
-                                "Q-Source 1"
-                            ],
-                            "basis": "Q-Source 1 emphasizes the need for engineer officers to be familiar with company procedures, which was not met during the inspection."
-                        },
-                        {
-                            "section": "Root Cause",
-                            "source_refs": [
-                                "Q-Source 1"
-                            ],
-                            "basis": "Q-Source 1 highlights the requirement for effective communication of procedures, indicating a systemic gap in the familiarisation process."
-                        },
-                        {
-                            "section": "Corrective Action",
-                            "source_refs": [
-                                "Q-Source 1"
-                            ],
-                            "basis": "Q-Source 1 specifies the need for records confirming compliance, which was addressed by reviewing and communicating the procedures to the crew."
-                        },
-                        {
-                            "section": "Preventative Action",
-                            "source_refs": [
-                                "Q-Source 1"
-                            ],
-                            "basis": "Q-Source 1 suggests implementing procedures for communication and familiarisation, which led to the establishment of a mandatory program for engineering officers."
-                        }
-                    ],
+                    "section_sources": [],
                     "sources": [
                         {
                             "stage": 1,
                             "ref": "Q-Source 1",
                             "filename": "questions.xlsx",
                             "score": 1,
-                            "snippet": "QUESTION 4.3.2: Were the engineer officers familiar with the company procedures defining machinery space operating mode and, where required to be attended, the machinery space team composition during the various stages of a voyage, and were records\navailable to confirm the machinery space had been operated accordingly?\n\nSHORT TITLE: Machinery space team composition\n\nROVIQ SEQUENCE: Engine Control Room, Bridge\n\nOBJECTIVE:\nTo ensure that the machinery space is adequately manned or monitored at all stages of a voyage or operation.\n\nEXPECTED EVIDENCE:\n• The company procedure that defined the required machinery space status during all stages of a voyage, including while at anchor, considering traffic density, proximity to navigational hazards and the state of visibility.\n• The company procedure that defined the required machinery space team composition considering traffic density, proximity to navigational hazards and the state of visibility and, during other operations such drifting, “at sea” STS operations, Dynamically Positioned (DP) cargo operations or underway stores / personnel transfer operations.\n• Engine Room Log Book, Engine Room Daily Order Book and any other supporting machi"
+                            "snippet": "QUESTION 4.3.2: Were the engineer officers familiar with the company procedures defining machinery space operating mode..."
                         }
                     ],
                     "updatedAt": "2026-08-13T07:26:24.813Z",
@@ -156,7 +137,6 @@ const OperatorCommentsPage = () => {
             }
 
             setStatus({ type: 'success', message: 'Comment analyzed successfully!' });
-
             setApiResponse(response.data || response);
 
         } catch (error) {
@@ -168,20 +148,47 @@ const OperatorCommentsPage = () => {
         }
     };
 
-    return (
-        <div className="flex h-screen flex-col bg-[#0f172a] text-slate-100">
+    const logoutFn = () => {
+        setConfirmConfig({
+            isOpen: true,
+            title: 'Log Out',
+            message: 'Are you sure you want to log out of your account?',
+            onConfirm: () => {
+                dispatch(logout());
+                navigate('/login');
+                setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+            }
+        });
+    };
+
+    const operatorCommentsSidebarMenuItems = [
+        { id: 'history', label: 'History', icon: Clipboard, isActive: activeMenuItemId === 'history' },
+    ];
+
+    const handleOperatorCommentsMenuClick = (menuItemId) => {
+        setActiveMenuItemId(menuItemId);
+    };
+
+    const handleNewComment = () => {
+        console.log('New comment clicked');
+    };
+
+    // Shared input classes depending on theme
+    const inputClasses = `w-full rounded-lg border px-4 py-2.5 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-none transition-all ${darkMode ? 'border-slate-600 bg-slate-900/80 text-slate-100 placeholder:text-slate-500' : 'border-slate-300 bg-white text-slate-900 placeholder:text-slate-400'}`;
+
+    const mainContentArea = (
+        <div className={`flex h-screen flex-col ${darkMode ? 'bg-[#0f172a] text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
             <ToolTabs />
 
-            <div className="flex-1 overflow-auto bg-[#111827] p-6">
-                <div className="mx-auto max-w-5xl rounded-2xl border border-slate-700/60 bg-[#1a2233] p-6 shadow-2xl shadow-slate-950/20">
-                    <div className="mb-6 border-b border-slate-700/60 pb-4">
-                        <h1 className="text-xl font-semibold text-white">Operator Comments</h1>
-                        <p className="mt-1 text-sm text-slate-400">Submit your inspection comments and review AI analysis.</p>
+            <div className={`flex-1 overflow-auto p-6 ${darkMode ? 'bg-[#111827]' : 'bg-slate-100'}`}>
+                <div className={`mx-auto max-w-5xl rounded-2xl border p-6 shadow-2xl ${darkMode ? 'border-slate-700/60 bg-[#1a2233] shadow-slate-950/20' : 'border-slate-200 bg-white shadow-slate-200/50'}`}>
+                    <div className={`mb-6 border-b pb-4 ${darkMode ? 'border-slate-700/60' : 'border-slate-200'}`}>
+                        <h1 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>Operator Comments</h1>
+                        <p className={`mt-1 text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Submit your inspection comments and review AI analysis.</p>
                     </div>
 
                     {status.message && (
-                        <div className={`mb-6 flex items-center gap-2 rounded-lg p-4 text-sm ${status.type === 'success' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'
-                            }`}>
+                        <div className={`mb-6 flex items-center gap-2 rounded-lg p-4 text-sm ${status.type === 'success' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
                             {status.type === 'success' ? <CheckCircle2 className="h-5 w-5" /> : <AlertCircle className="h-5 w-5" />}
                             {status.message}
                         </div>
@@ -190,7 +197,7 @@ const OperatorCommentsPage = () => {
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                             <div className="space-y-2">
-                                <label className="text-xs font-semibold uppercase tracking-wide text-slate-300">
+                                <label className={`text-xs font-semibold uppercase tracking-wide ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                                     Question No
                                 </label>
                                 <input
@@ -198,18 +205,18 @@ const OperatorCommentsPage = () => {
                                     value={formData.questionNo}
                                     onChange={(e) => handleInputChange('questionNo', e.target.value)}
                                     placeholder="e.g. 2.3.2"
-                                    className="w-full rounded-lg border border-slate-600 bg-slate-900/80 px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-none transition-all"
+                                    className={inputClasses}
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-xs font-semibold uppercase tracking-wide text-slate-300">
+                                <label className={`text-xs font-semibold uppercase tracking-wide ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                                     Category
                                 </label>
                                 <select
                                     value={formData.category}
                                     onChange={(e) => handleInputChange('category', e.target.value)}
-                                    className="w-full rounded-lg border border-slate-600 bg-slate-900/80 px-4 py-2.5 text-sm text-slate-100 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-none transition-all"
+                                    className={inputClasses}
                                 >
                                     <option value="">— select —</option>
                                     {categoryOptions.map(cat => (
@@ -219,14 +226,14 @@ const OperatorCommentsPage = () => {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-xs font-semibold uppercase tracking-wide text-slate-300">
+                                <label className={`text-xs font-semibold uppercase tracking-wide ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                                     Response Type
                                 </label>
                                 <select
                                     value={formData.responseType}
                                     onChange={(e) => handleInputChange('responseType', e.target.value)}
                                     disabled={!formData.category}
-                                    className="w-full rounded-lg border border-slate-600 bg-slate-900/80 px-4 py-2.5 text-sm text-slate-100 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className={`${inputClasses} disabled:opacity-50 disabled:cursor-not-allowed`}
                                 >
                                     <option value="">— select —</option>
                                     {formData.category && responseOptions[formData.category]?.map((opt, idx) => (
@@ -237,7 +244,7 @@ const OperatorCommentsPage = () => {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-xs font-semibold uppercase tracking-wide text-slate-300">
+                            <label className={`text-xs font-semibold uppercase tracking-wide ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                                 Inspector Comment
                             </label>
                             <textarea
@@ -245,7 +252,7 @@ const OperatorCommentsPage = () => {
                                 onChange={(e) => handleInputChange('comment', e.target.value)}
                                 placeholder="Enter detailed inspector comment here..."
                                 rows={3}
-                                className="w-full resize-none rounded-lg border border-slate-600 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-none transition-all"
+                                className={`w-full resize-none rounded-lg border px-4 py-3 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus:outline-none transition-all ${darkMode ? 'border-slate-600 bg-slate-900/80 text-slate-100 placeholder:text-slate-500' : 'border-slate-300 bg-white text-slate-900 placeholder:text-slate-400'}`}
                             />
                         </div>
 
@@ -255,11 +262,7 @@ const OperatorCommentsPage = () => {
                                 disabled={isLoading}
                                 className="inline-flex items-center gap-2 rounded-lg bg-sky-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-sky-500/20 transition-all hover:bg-sky-400 focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-70 disabled:cursor-not-allowed"
                             >
-                                {isLoading ? (
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                    <Save className="h-4 w-4" />
-                                )}
+                                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                                 {isLoading ? 'Analyzing...' : 'Submit & Analyze'}
                             </button>
                         </div>
@@ -267,26 +270,25 @@ const OperatorCommentsPage = () => {
 
                     {/* AI Analysis Results Section */}
                     {apiResponse && (apiResponse.result || apiResponse.immediate_cause) && (
-                        <div className="mt-10 border-t border-slate-700/60 pt-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <div className={`mt-10 border-t pt-8 animate-in fade-in slide-in-from-bottom-4 duration-500 ${darkMode ? 'border-slate-700/60' : 'border-slate-200'}`}>
                             <div className="mb-6 flex items-center justify-between">
                                 <div>
-                                    <h2 className="text-lg font-semibold text-white">AI Analysis Report</h2>
-                                    <p className="text-sm text-slate-400">
+                                    <h2 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>AI Analysis Report</h2>
+                                    <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                                         {apiResponse.question_info?.title || apiResponse.question_number}
                                     </p>
                                 </div>
-                                {/* confidence */}
                             </div>
 
                             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                                {/* Adjusted accessors to support both the nested PHP result or flattened Node result */}
                                 {(apiResponse.result?.observation || apiResponse.observation) && (
                                     <div className="md:col-span-2">
                                         <ResultCard
                                             title="Observation"
                                             icon={<Eye className="h-4 w-4" />}
                                             content={apiResponse.result?.observation || apiResponse.observation}
-                                            colorClass="text-sky-400"
+                                            colorClass="text-sky-500"
+                                            darkMode={darkMode}
                                         />
                                     </div>
                                 )}
@@ -294,50 +296,50 @@ const OperatorCommentsPage = () => {
                                     title="Immediate Cause"
                                     icon={<AlertTriangle className="h-4 w-4" />}
                                     content={apiResponse.result?.immediate_cause || apiResponse.immediate_cause}
-                                    colorClass="text-amber-400"
+                                    colorClass="text-amber-500"
+                                    darkMode={darkMode}
                                 />
                                 <ResultCard
                                     title="Root Cause"
                                     icon={<Target className="h-4 w-4" />}
                                     content={apiResponse.result?.root_cause || apiResponse.root_cause}
-                                    colorClass="text-rose-400"
+                                    colorClass="text-rose-500"
+                                    darkMode={darkMode}
                                 />
                                 <ResultCard
                                     title="Corrective Action"
                                     icon={<Wrench className="h-4 w-4" />}
                                     content={apiResponse.result?.corrective_action || apiResponse.corrective_action}
-                                    colorClass="text-emerald-400"
+                                    colorClass="text-emerald-500"
+                                    darkMode={darkMode}
                                 />
                                 <ResultCard
                                     title="Preventative Action"
                                     icon={<ShieldCheck className="h-4 w-4" />}
                                     content={apiResponse.result?.preventative_action || apiResponse.preventative_action}
-                                    colorClass="text-indigo-400"
+                                    colorClass="text-indigo-500"
+                                    darkMode={darkMode}
                                 />
                             </div>
 
                             {/* Sources Section */}
                             {apiResponse.sources && apiResponse.sources.length > 0 && (
-                                <div className="mt-6 rounded-xl border border-slate-700/60 bg-[#0f172a] p-5">
-                                    <h3 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-slate-300">
-                                        <BookOpen className="h-4 w-4 text-slate-400" />
+                                <div className={`mt-6 rounded-xl border p-5 ${darkMode ? 'border-slate-700/60 bg-[#0f172a]' : 'border-slate-200 bg-slate-50'}`}>
+                                    <h3 className={`mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                                        <BookOpen className={`h-4 w-4 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`} />
                                         Referenced Sources
                                     </h3>
                                     <div className="max-h-[300px] overflow-y-auto pr-2 space-y-4 custom-scrollbar">
                                         {apiResponse.sources.map((src, idx) => (
-                                            <div key={idx} className="rounded-lg border border-slate-700/50 bg-[#1a2233] p-4 text-sm transition-colors hover:border-slate-600">
+                                            <div key={idx} className={`rounded-lg border p-4 text-sm transition-colors ${darkMode ? 'border-slate-700/50 bg-[#1a2233] hover:border-slate-600' : 'border-slate-200 bg-white hover:border-slate-300 shadow-sm'}`}>
                                                 <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                                                    <span className="inline-flex items-center gap-1.5 rounded bg-sky-500/10 px-2 py-1 font-medium text-sky-400 border border-sky-500/20">
+                                                    <span className="inline-flex items-center gap-1.5 rounded bg-sky-500/10 px-2 py-1 font-medium text-sky-500 border border-sky-500/20">
                                                         <FileText className="h-3.5 w-3.5" />
                                                         {src.ref}
                                                     </span>
-                                                    {/* <span className="text-xs font-medium text-slate-500">
-                                                        Score
-                                                    </span> */}
                                                 </div>
-                                                <p className="text-xs text-slate-400 mb-2 truncate">File: {src.filename}</p>
-                                                {/* Added whitespace-pre-wrap here to render \n as line breaks */}
-                                                <p className="text-slate-300 italic leading-relaxed text-xs border-l-2 border-slate-600 pl-3 whitespace-pre-wrap">
+                                                <p className={`text-xs mb-2 truncate ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>File: {src.filename}</p>
+                                                <p className={`italic leading-relaxed text-xs border-l-2 pl-3 whitespace-pre-wrap ${darkMode ? 'text-slate-300 border-slate-600' : 'text-slate-700 border-slate-300'}`}>
                                                     "{src.snippet}"
                                                 </p>
                                             </div>
@@ -350,6 +352,40 @@ const OperatorCommentsPage = () => {
                 </div>
             </div>
         </div>
+    );
+
+    return (
+        <>
+            <LayoutShell
+                leftCollapsed={sidebarCollapsed}
+                left={
+                    <Sidebar
+                        collapsed={sidebarCollapsed}
+                        activeConversationId=""
+                        conversations={[]}
+                        onNewConversation={handleNewComment}
+                        onSelectConversation={() => { }}
+                        logoutFn={logoutFn}
+                        user={user}
+                        onToggle={() => setSidebarCollapsed((prev) => !prev)}
+                        menuItems={operatorCommentsSidebarMenuItems}
+                        actionButtonLabel="New comment"
+                        onMenuItemClick={handleOperatorCommentsMenuClick}
+                        showConversations={false}
+                    />
+                }
+                main={mainContentArea}
+            />
+
+            <ConfirmationModal
+                isOpen={confirmConfig.isOpen}
+                title={confirmConfig.title}
+                message={confirmConfig.message}
+                darkMode={darkMode}
+                onConfirm={confirmConfig.onConfirm}
+                onCancel={() => setConfirmConfig(prev => ({ ...prev, isOpen: false }))}
+            />
+        </>
     );
 };
 

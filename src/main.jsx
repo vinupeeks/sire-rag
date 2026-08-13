@@ -15,7 +15,7 @@ const Router = useHashRouter ? HashRouter : BrowserRouter;
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <Router>
+    <Router basename={import.meta.env.BASE_URL}>
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
           <App />

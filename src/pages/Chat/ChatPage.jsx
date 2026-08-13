@@ -218,41 +218,30 @@ const ChatPage = () => {
         });
     };
 
+    // SMS sidebar menu items
+    const smsSidebarMenuItems = [
+        {
+            id: 'chat',
+            label: 'SMS Chat',
+            icon: MessageSquare,
+            isActive: activeTab === 'chat',
+        },
+        {
+            id: 'files',
+            label: 'SMS Search library',
+            icon: FolderOpen,
+            isActive: activeTab === 'files',
+        },
+    ];
+
+    const handleSmsMenuClick = (menuItemId) => {
+        setActiveTab(menuItemId);
+    };
+
     // Main workspace renderer wrapping both navigation headers and page contents
     const mainWorkspaceContent = (
         <div className="flex flex-col h-screen w-full overflow-hidden">
             <ToolTabs />
-
-            {/* Top Workspace View Navigation Bar */}
-            <div className={`flex items-center justify-start border-b px-6 h-14 gap-3 flex-shrink-0 transition-colors duration-300 ${darkMode
-                ? 'border-slate-700/40 bg-[#273346]/40'
-                : 'border-slate-200 bg-slate-100'
-                }`}>
-                <button
-                    onClick={() => setActiveTab('chat')}
-                    className={`flex items-center gap-2 px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${activeTab === 'chat'
-                        ? 'bg-[#0091ff] text-white shadow-sm shadow-[#0091ff]/20'
-                        : darkMode
-                            ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/30'
-                            : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200'
-                        }`}
-                >
-                    <MessageSquare className="h-3.5 w-3.5" />
-                    SMS Chat
-                </button>
-                <button
-                    onClick={() => setActiveTab('files')}
-                    className={`flex items-center gap-2 px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${activeTab === 'files'
-                        ? 'bg-[#0091ff] text-white shadow-sm shadow-[#0091ff]/20'
-                        : darkMode
-                            ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/30'
-                            : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200'
-                        }`}
-                >
-                    <FolderOpen className="h-3.5 w-3.5" />
-                    SMS Search library ({pdfs.length})
-                </button>
-            </div>
 
             {/* View Switching Controller Panel */}
             <div className="flex-1 overflow-hidden bg-[#161b26]">
@@ -294,6 +283,10 @@ const ChatPage = () => {
                         logoutFn={logoutFn}
                         user={user}
                         onToggle={() => setSidebarCollapsed((prev) => !prev)}
+                        menuItems={smsSidebarMenuItems}
+                        actionButtonLabel="New chat"
+                        onMenuItemClick={handleSmsMenuClick}
+                        showConversations={true}
                     />
                 }
                 main={mainWorkspaceContent}

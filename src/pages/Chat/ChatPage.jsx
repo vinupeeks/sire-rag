@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LayoutShell from '../../components/layout/LayoutShell';
 import Sidebar from '../../components/layout/Sidebar';
+import ToolTabs from '../../components/layout/ToolTabs';
 import ChatArea from '../../components/chat/ChatArea';
 import KnowledgeBaseView from '../../components/Files/KnowledgeBaseView';
 import { useDispatch, useSelector } from 'react-redux';
@@ -220,6 +221,7 @@ const ChatPage = () => {
     // Main workspace renderer wrapping both navigation headers and page contents
     const mainWorkspaceContent = (
         <div className="flex flex-col h-screen w-full overflow-hidden">
+            <ToolTabs />
 
             {/* Top Workspace View Navigation Bar */}
             <div className={`flex items-center justify-start border-b px-6 h-14 gap-3 flex-shrink-0 transition-colors duration-300 ${darkMode

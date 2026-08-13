@@ -23,7 +23,7 @@ const LoginPage = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/chat');
+      navigate('/operator-comments');
     }
   }, [isAuthenticated, navigate]);
 
@@ -39,7 +39,7 @@ const LoginPage = () => {
 
       if (response?.data?.success) {
         dispatch(setUser(response.data.data));
-        navigate('/chat');
+        navigate('/operator-comments');
       } else {
         setError('Invalid email or password');
       }

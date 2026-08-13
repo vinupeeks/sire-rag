@@ -3,6 +3,7 @@ import { persistStore, persistReducer } from 'redux-persist';
 import rootReducer from './reducers';
 import { userApi } from './services/userApi.js';
 import { smsApi } from './services/smsApi.js';
+import { operatorComments } from './services/operatorCommentsApi';
 
 import storageModule from 'redux-persist/lib/storage';
 const storage = storageModule.default || storageModule;
@@ -14,6 +15,7 @@ const persistConfig = {
         'pagination',
         userApi.reducerPath,
         smsApi.reducerPath,
+        operatorComments.reducerPath,
     ],
 };
 
@@ -27,7 +29,8 @@ export const store = configureStore({
             serializableCheck: false,
         })
             .concat(userApi.middleware)
-            .concat(smsApi.middleware),
+            .concat(smsApi.middleware)
+            .concat(operatorComments.middleware),
 });
 
 export const persistor = persistStore(store);

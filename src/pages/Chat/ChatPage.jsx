@@ -287,6 +287,8 @@ const ChatPage = () => {
                         actionButtonLabel="New chat"
                         onMenuItemClick={handleSmsMenuClick}
                         showConversations={true}
+                        sidebarTitle="SMS Search"
+                        sidebarSubtitle="AI Search"
                     />
                 }
                 main={mainWorkspaceContent}

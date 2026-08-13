@@ -13,9 +13,19 @@ export const operatorComments = createApi({
                 body: data
             }),
         }),
+
+        // page and size should be in params
+        list: builder.mutation({
+            query: (data) => ({
+                url: `/api/operator-comments/list`,
+                method: 'POST',
+                body: data
+            }),
+        }),
     }),
 });
 
 export const {
     useFetchMutation,
+    useListMutation,
 } = operatorComments;

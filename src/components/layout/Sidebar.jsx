@@ -17,6 +17,8 @@ const Sidebar = ({
     actionButtonLabel = 'New chat',
     onMenuItemClick = () => { },
     showConversations = true,
+    sidebarTitle = 'SMS Search',
+    sidebarSubtitle,
 }) => {
     const dispatch = useDispatch();
     const darkMode = useSelector((state) => state.data.darkMode);
@@ -76,8 +78,8 @@ const Sidebar = ({
 
                     {!collapsed && (
                         <div className="min-w-0 flex-1">
-                            <p className="truncate text-xs font-bold uppercase tracking-wider leading-tight">SMS Search</p>
-                            <p className={`truncate text-[10px] font-semibold tracking-wide leading-none mt-0.5 ${darkMode ? 'text-sky-400' : 'text-sky-600'}`}>AI Search</p>
+                            <p className="truncate text-xs font-bold uppercase tracking-wider leading-tight">{sidebarTitle}</p>
+                            <p className={`truncate text-[10px] font-semibold tracking-wide leading-none mt-0.5 ${darkMode ? 'text-sky-400' : 'text-sky-600'}`}>{sidebarSubtitle}</p>
                         </div>
                     )}
 

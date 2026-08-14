@@ -363,8 +363,9 @@ const InspectionComments = ({ darkMode }) => {
 
                         <div className="mb-6 flex items-center justify-between">
                             <div>
-                                <h2 className={`text-md font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>
-                                    {apiResponse.question_info?.title || apiResponse.question_number}
+                                <h2 className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+                                    <p className={`mt-1 mb-1 text-sm items-end ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{`${apiResponse.question_number} - ${apiResponse.category} - ${apiResponse.response_type}`}</p>
+                                    {`${apiResponse.comment}`}
                                 </h2>
                             </div>
                         </div>

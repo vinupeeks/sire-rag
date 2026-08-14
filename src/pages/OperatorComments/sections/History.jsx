@@ -6,7 +6,8 @@ import {
     ChevronRight,
     ChevronDown,
     ChevronUp,
-    X
+    X,
+    Copy
 } from 'lucide-react';
 import { useListMutation } from '../../../redux/services/operatorCommentsApi';
 
@@ -53,6 +54,16 @@ const History = ({ darkMode }) => {
     const clearFilters = () => {
         setFilters(initialFilters);
         setExpandedId(null);
+    };
+
+    const handleCopy = async (text) => {
+        if (!text || text === 'N/A') return;
+
+        try {
+            await navigator.clipboard.writeText(text);
+        } catch (error) {
+            console.error('Failed to copy:', error);
+        }
     };
 
     const toggleExpand = (id) => {
@@ -236,6 +247,7 @@ const History = ({ darkMode }) => {
                                     <th className="p-4 font-semibold w-24">VIQ</th>
                                     <th className="p-4 font-semibold w-32">Category</th>
                                     <th className="p-4 font-semibold">Comment</th>
+                                    <th className="p-4 font-semibold">Response</th>
                                     <th className="p-4 font-semibold w-40">Date</th>
                                     <th className="p-4 font-semibold w-12"></th>
                                 </tr>
@@ -277,6 +289,16 @@ const History = ({ darkMode }) => {
                                                 <td className="p-4">
                                                     <div className={`text-sm truncate max-w-[200px] md:max-w-md lg:max-w-lg ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
                                                         {item.comment || 'No comment provided.'}
+                                                    </div>
+                                                </td>
+
+                                                <td className="p-4">
+                                                    <div
+                                                        className={`text-sm w-[150px] truncate whitespace-nowrap ${darkMode ? 'text-slate-400' : 'text-slate-600'
+                                                            }`}
+                                                        title={item.response_type || 'No response provided.'}
+                                                    >
+                                                        {item.response_type || 'No response provided.'}
                                                     </div>
                                                 </td>
 
@@ -329,22 +351,50 @@ const History = ({ darkMode }) => {
 
                                                             {/* AI Analysis Grid */}
                                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                                <div className={`p-4 rounded-lg border ${darkMode ? 'border-slate-700/50 bg-slate-800/20' : 'border-slate-100 bg-white'}`}>
-                                                                    <h4 className={`text-xs font-bold tracking-wider mb-2 ${darkMode ? 'text-rose-400' : 'text-rose-600'}`}>Immediate Cause</h4>
-                                                                    <p className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>{item.immediate_cause || 'N/A'}</p>
-                                                                </div>
-                                                                <div className={`p-4 rounded-lg border ${darkMode ? 'border-slate-700/50 bg-slate-800/20' : 'border-slate-100 bg-white'}`}>
-                                                                    <h4 className={`text-xs font-bold tracking-wider mb-2 ${darkMode ? 'text-orange-400' : 'text-orange-600'}`}>Root Cause</h4>
-                                                                    <p className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>{item.root_cause || 'N/A'}</p>
-                                                                </div>
-                                                                <div className={`p-4 rounded-lg border ${darkMode ? 'border-slate-700/50 bg-slate-800/20' : 'border-slate-100 bg-white'}`}>
-                                                                    <h4 className={`text-xs font-bold tracking-wider mb-2 ${darkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>Corrective Action</h4>
-                                                                    <p className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>{item.corrective_action || 'N/A'}</p>
-                                                                </div>
-                                                                <div className={`p-4 rounded-lg border ${darkMode ? 'border-slate-700/50 bg-slate-800/20' : 'border-slate-100 bg-white'}`}>
-                                                                    <h4 className={`text-xs font-bold tracking-wider mb-2 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>Preventative Action</h4>
-                                                                    <p className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>{item.preventative_action || 'N/A'}</p>
-                                                                </div>
+                                                                {[
+                                                                    { label: 'Immediate Cause', value: item.immediate_cause, color: darkMode ? 'text-rose-400' : 'text-rose-600' },
+                                                                    { label: 'Root Cause', value: item.root_cause, color: darkMode ? 'text-orange-400' : 'text-orange-600' },
+                                                                    { label: 'Corrective Action', value: item.corrective_action, color: darkMode ? 'text-emerald-400' : 'text-emerald-600' },
+                                                                    { label: 'Preventative Action', value: item.preventative_action, color: darkMode ? 'text-blue-400' : 'text-blue-600' }
+                                                                ].map(({ label, value, color }) => (
+                                                                    <div
+                                                                        key={label}
+                                                                        className={`p-4 rounded-lg border ${darkMode
+                                                                            ? 'border-slate-700/50 bg-slate-800/20'
+                                                                            : 'border-slate-100 bg-white'
+                                                                            }`}
+                                                                    >
+                                                                        <div className="flex items-center justify-between mb-2">
+                                                                            <h4
+                                                                                className={`text-xs font-bold tracking-wider ${color}`}
+                                                                            >
+                                                                                {label}
+                                                                            </h4>
+
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    handleCopy(value);
+                                                                                }}
+                                                                                title={`Copy ${label}`}
+                                                                                className={`p-1.5 rounded-md transition-colors ${darkMode
+                                                                                    ? 'text-slate-400 hover:text-white hover:bg-slate-700'
+                                                                                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+                                                                                    }`}
+                                                                            >
+                                                                                <Copy className="h-4 w-4" />
+                                                                            </button>
+                                                                        </div>
+
+                                                                        <p
+                                                                            className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'
+                                                                                }`}
+                                                                        >
+                                                                            {value || 'N/A'}
+                                                                        </p>
+                                                                    </div>
+                                                                ))}
                                                             </div>
                                                         </div>
                                                     </td>

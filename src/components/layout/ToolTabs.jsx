@@ -13,7 +13,7 @@ const tabs = [
     },
     {
         key: 'ai-search',
-        label: 'SMS Chat',
+        label: 'SMS Search',
         path: ROUTES.CHAT,
         icon: Search,
     },

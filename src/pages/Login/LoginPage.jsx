@@ -55,57 +55,10 @@ const LoginPage = () => {
       <div className="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-blue-500/10 blur-3xl" />
 
       <div className="relative z-10 flex w-[80%]">
-        {/* Left Section */}
-        {/* <div className="hidden w-1/2 flex-col justify-center px-16 xl:flex">
-          <div className="max-w-xl">
-            <div className="mb-4 flex items-center gap-2">
-              <div className="flex h-10 w-26 items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 shadow-lg p-2 flex-shrink-0">
-                <img
-                  src={Logo}
-                  alt="Logo"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-
-              <div>
-                <h1 className="text-3xl font-bold text-white">
-                  SMS Search
-                </h1>
-              </div>
-            </div>
-
-            <h2 className="mb-2 text-5xl font-bold leading-tight text-white">
-              Operational Excellence
-              <span className="block bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-                Through Knowledge
-              </span>
-            </h2>
-
-            <p className="mb-5 text-lg leading-relaxed text-slate-300">
-              A unified platform for accessing safety procedures, compliance
-              documentation, operational standards, and organizational knowledge.
-            </p>
-
-            <div className="space-y-5">
-              {[
-                'Safety Management Resources',
-                'Compliance Documentation',
-                'Risk & Audit Information',
-                'Intelligent Knowledge Discovery',
-              ].map((item) => (
-                <div key={item} className="flex items-center gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-cyan-400" />
-                  <span className="text-slate-200">{item}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div> */}
 
         <div className="hidden w-1/2 flex-col justify-center xl:flex ml-20">
           <div className="max-w-2xl">
-            {/* ─── CHANGED: Switched to flex-col and gap-4 for vertical stack ─── */}
-            <div className="mb-4 flex flex-col items-start gap-4">
+            <div className="mb-4 flex flex-col items-start gap-1">
               {/* Row 1: Logo */}
               <div className="flex h-10 w-26 items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 shadow-lg p-2 flex-shrink-0">
                 <img
@@ -118,20 +71,45 @@ const LoginPage = () => {
               {/* Row 2: Title */}
               <div>
                 <h1 className="text-4xl font-bold text-white">
-                  Safety Management System Search
+                 Marine Operator Assistant
                 </h1>
               </div>
             </div>
 
             {/* Row 3: Subtitle block */}
-            <h2 className="mb-2 text-2xl font-bold leading-tight text-white">
-              Operational Excellence
+            <h2 className="text-2xl font-bold leading-tight text-white">
               <span className="block bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                Operational Excellence
                 Through Knowledge
               </span>
             </h2>
 
-            {/* ... rest of your commented code elements ... */}
+            <span className="block bg-gradient-to-r from-gray-400 to-gray-400 bg-clip-text text-transparent">
+              Draft operator comments and search the safety management system, in one place.
+            </span>
+
+            <div className="w-[413px] space-y-[14px] py-4">
+              {/* Operator comments */}
+              <div className="h-[68px] rounded-[10px] bg-[#112f4a] px-8 py-[14px]">
+                <h3 className="text-[16px] font-medium leading-5 text-white">
+                  Operator Comments Assistant
+                </h3>
+                <p className="text-[14px] leading-5 text-[#8eb5d8]">
+                  Draft, review, refine
+                </p>
+              </div>
+
+              {/* SMS search */}
+              <div className="h-[68px] rounded-[10px] bg-[#112f4a] px-8 py-[14px]">
+                <h3 className="text-[16px] font-medium leading-5 text-white">
+                  Safety Management Search
+                </h3>
+                <p className="text-[14px] leading-5 text-[#8eb5d8]">
+                  Procedures, VIQ, findings
+                </p>
+              </div>
+            </div>
+
           </div>
         </div>
 
@@ -151,12 +129,12 @@ const LoginPage = () => {
 
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-slate-900">
-                Welcome to SMS Search
+                Welcome Back
               </h1>
 
-              {/* <p className="mt-2 text-sm text-slate-500">
-                Safety Management System
-              </p> */}
+              <p className="mt-2 text-sm text-slate-500">
+                Safety Operations & Operator Assistance
+              </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -222,11 +200,6 @@ const LoginPage = () => {
               </Button>
             </form>
 
-            {/* <div className="mt-8 border-t border-slate-200 pt-5 text-center">
-              <p className="text-xs text-slate-400">
-                Secure access to Safety Management System
-              </p>
-            </div> */}
           </div>
         </div>
       </div>

@@ -7,7 +7,9 @@ import {
     ChevronDown,
     ChevronUp,
     X,
-    Copy
+    Copy,
+    BookOpen,
+    FileText
 } from 'lucide-react';
 import { useListMutation } from '../../../redux/services/operatorCommentsApi';
 
@@ -328,25 +330,22 @@ const History = ({ darkMode }) => {
                                                     <td colSpan="5" className={`p-0 border-b ${darkMode ? 'border-slate-700/50' : 'border-slate-200'}`}>
                                                         <div className="p-6">
                                                             {/* Extra metadata and Full Comment */}
-                                                            <div className="flex flex-col mb-4 gap-4">
-                                                                <div className="flex items-center gap-3">
-                                                                    <span className={`text-xs font-bold tracking-wider ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                                                                        Response Type:
-                                                                    </span>
-                                                                    <span className={`px-2.5 py-1 rounded-md text-xs font-medium border ${darkMode ? 'border-slate-600 text-slate-300 bg-slate-800' : 'border-slate-300 text-slate-600 bg-white'
-                                                                        }`}>
-                                                                        {item.response_type || 'N/A'}
-                                                                    </span>
+                                                            <div className="flex flex-col mb-2 gap-4">
+                                                                <div className="mb-2 flex items-center justify-between">
+                                                                    <div>
+                                                                        <h2 className={`text-sm font-semibold ${darkMode ? 'text-slate-400' : 'text-slate-900'}`}>
+                                                                            <p className={`mt-1 mb-1 text-sm items-end ${darkMode ? 'text-white' : 'text-slate-500'}`}>{`${item.question_info?.title}`}</p>
+                                                                            <p className={`mt-1 mb-1 text-sm items-end ${darkMode ? 'text-white' : 'text-slate-500'}`}>{`${item.category} - ${item.response_type}`}</p>
+                                                                            Inspector Remark: {`${item.comment}`}
+                                                                        </h2>
+                                                                    </div>
                                                                 </div>
+                                                            </div>
 
-                                                                <div className={`p-4 rounded-lg ${darkMode ? 'bg-slate-800/50' : 'border border-slate-100 bg-slate-50/50'}`}>
-                                                                    <h4 className={`text-xs font-bold tracking-wider mb-2 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                                                                        Original Comment
-                                                                    </h4>
-                                                                    <p className={`text-sm whitespace-pre-wrap ${darkMode ? 'text-slate-200' : 'text-slate-800'}`}>
-                                                                        {item.comment || 'N/A'}
-                                                                    </p>
-                                                                </div>
+                                                            <div className="mb-3">
+                                                                <span className={`text-base font-semibold ${darkMode ? 'text-white' : 'text-slate-500'}`}>
+                                                                    Operator Comments
+                                                                </span>
                                                             </div>
 
                                                             {/* AI Analysis Grid */}
@@ -396,6 +395,32 @@ const History = ({ darkMode }) => {
                                                                     </div>
                                                                 ))}
                                                             </div>
+
+                                                            {/* Sources Section */}
+                                                            {item.sources && item.sources.length > 0 && (
+                                                                <div className={`mt-6 rounded-xl border p-5 ${darkMode ? 'border-slate-700/60 bg-[#0f172a]' : 'border-slate-200 bg-slate-50'}`}>
+                                                                    <h3 className={`mb-4 flex items-center gap-2 text-sm font-semibold tracking-wide ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                                                                        <BookOpen className={`h-4 w-4 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`} />
+                                                                        Referenced Sources
+                                                                    </h3>
+                                                                    <div className="max-h-[300px] overflow-y-auto pr-2 space-y-4 custom-scrollbar">
+                                                                        {item.sources.map((src, idx) => (
+                                                                            <div key={idx} className={`rounded-lg border p-4 text-sm transition-colors ${darkMode ? 'border-slate-700/50 bg-[#1a2233] hover:border-slate-600' : 'border-slate-200 bg-white hover:border-slate-300 shadow-sm'}`}>
+                                                                                <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                                                                                    <span className="inline-flex items-center gap-1.5 rounded bg-sky-500/10 px-2 py-1 font-medium text-sky-500 border border-sky-500/20">
+                                                                                        <FileText className="h-3.5 w-3.5" />
+                                                                                        {src.ref}
+                                                                                    </span>
+                                                                                </div>
+                                                                                <p className={`text-xs mb-2 truncate ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>File: {src.filename}</p>
+                                                                                <p className={`italic leading-relaxed text-xs border-l-2 pl-3 whitespace-pre-wrap ${darkMode ? 'text-slate-300 border-slate-600' : 'text-slate-700 border-slate-300'}`}>
+                                                                                    "{src.snippet}"
+                                                                                </p>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     </td>
                                                 </tr>

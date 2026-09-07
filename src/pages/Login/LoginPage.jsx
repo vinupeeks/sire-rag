@@ -8,6 +8,7 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { useLoginMutation } from '../../redux/services/userApi';
 import { setUser } from '../../redux/reducers/authReducers';
+import { ROUTES } from '../../constants/routes';
 
 const LoginPage = () => {
   const [login, { isLoading }] = useLoginMutation();
@@ -23,7 +24,7 @@ const LoginPage = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/operator-comments');
+      navigate(ROUTES.OPERATOR_COMMENTS_FROM_REPORT_INSPECTIONS);
     }
   }, [isAuthenticated, navigate]);
 
@@ -39,7 +40,7 @@ const LoginPage = () => {
 
       if (response?.data?.success) {
         dispatch(setUser(response.data.data));
-        navigate('/operator-comments');
+        navigate(ROUTES.OPERATOR_COMMENTS_FROM_REPORT_INSPECTIONS);
       } else {
         setError('Invalid email or password');
       }

@@ -5,10 +5,16 @@ import { MessageSquareText, Search } from 'lucide-react';
 import { ROUTES } from '../../constants/routes';
 
 const tabs = [
+    // {
+    //     key: 'operator-comments',
+    //     label: 'Operator Comments',
+    //     path: ROUTES.OPERATOR_COMMENTS,
+    //     icon: MessageSquareText,
+    // },
     {
-        key: 'operator-comments',
+        key: 'operator-comments-from-report',
         label: 'Operator Comments',
-        path: ROUTES.OPERATOR_COMMENTS,
+        path: ROUTES.OPERATOR_COMMENTS_FROM_REPORT,
         icon: MessageSquareText,
     },
     {
@@ -26,7 +32,11 @@ const ToolTabs = () => {
     // Pull darkMode from Redux state
     const darkMode = useSelector((state) => state.data.darkMode);
 
-    const activeTab = location.pathname === ROUTES.OPERATOR_COMMENTS ? 'operator-comments' : 'ai-search';
+    const activeTab = location.pathname.startsWith(ROUTES.OPERATOR_COMMENTS_FROM_REPORT)
+        ? 'operator-comments-from-report'
+        : location.pathname === ROUTES.OPERATOR_COMMENTS
+            ? 'operator-comments'
+            : 'ai-search';
 
     return (
         <div

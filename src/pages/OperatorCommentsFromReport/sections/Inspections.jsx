@@ -115,7 +115,7 @@ const Inspections = ({ darkMode }) => {
                                         <span className={`inline-flex items-center gap-2 text-xs ${mutedTextClass}`}><CalendarDays className="h-4 w-4" />{formatDate(inspection.inspection_date)}</span>
                                         <span className={`text-xs ${mutedTextClass}`}>{inspection.report_no}</span>
                                         <span className={`inline-flex items-center justify-end gap-1 text-xs font-semibold transition-colors ${darkMode ? 'text-sky-400 group-hover:text-sky-300' : 'text-sky-600 group-hover:text-sky-700'}`}>
-                                            View details <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                                            View Non Conformance <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                                         </span>
                                     </button>
                                 ))}

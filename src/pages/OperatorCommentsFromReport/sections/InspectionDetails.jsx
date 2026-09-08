@@ -17,6 +17,21 @@ const DetailValue = ({ darkMode, label, value }) => (
     </div>
 );
 
+const MetadataBadge = ({ darkMode, label, value, accent = 'slate' }) => {
+    const accentClasses = {
+        amber: darkMode ? 'border-amber-400/30 bg-amber-400/10 text-amber-300' : 'border-amber-200 bg-amber-50 text-amber-700',
+        sky: darkMode ? 'border-sky-400/30 bg-sky-400/10 text-sky-300' : 'border-sky-200 bg-sky-50 text-sky-700',
+        slate: darkMode ? 'border-slate-600 bg-slate-800/70 text-slate-300' : 'border-slate-200 bg-slate-50 text-slate-600',
+    };
+
+    return (
+        <span className={`inline-flex max-w-full items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs ${accentClasses[accent]}`}>
+            <span className="font-semibold uppercase tracking-wide opacity-70">{label}</span>
+            <span className="truncate font-semibold">{value || 'N/A'}</span>
+        </span>
+    );
+};
+
 const ANALYSIS_LOADING_MESSAGES = [
     'Reviewing observation details...',
     'Cross-referencing regulatory frameworks...',
@@ -27,6 +42,7 @@ const ANALYSIS_LOADING_MESSAGES = [
 
 const InlineOperatorComments = ({ details, darkMode }) => {
     const [submitComment, { isLoading }] = useFetchMutation();
+    const [isRegenerating, setIsRegenerating] = useState(false);
     const [operatorFeedback, setOperatorFeedback] = useState('');
     const [generatedComment, setGeneratedComment] = useState(null);
     const [selectedCommentIndex, setSelectedCommentIndex] = useState(0);
@@ -38,6 +54,7 @@ const InlineOperatorComments = ({ details, darkMode }) => {
     const comments = details.comments || [];
     const existingComment = comments[selectedCommentIndex];
     const comment = generatedComment || existingComment;
+    const isGenerating = isLoading || isRegenerating;
     const category = details.category ? details.category.charAt(0) + details.category.slice(1).toLowerCase() : '';
 
     useEffect(() => {
@@ -71,7 +88,7 @@ const InlineOperatorComments = ({ details, darkMode }) => {
 
     if (comment) {
         return (
-            <div className={`mt-6 border-t pt-6 ${darkMode ? 'border-slate-700/50' : 'border-slate-200/80'}`}>
+            <div className={`relative mt-6 border-t pt-6 ${darkMode ? 'border-slate-700/50' : 'border-slate-200/80'}`}>
                 {/* Section Header & Pagination */}
                 <div className="mb-4 flex items-center justify-between gap-3">
                     <div>
@@ -85,9 +102,9 @@ const InlineOperatorComments = ({ details, darkMode }) => {
                     <div className="flex items-center gap-2">
                         {!generatedComment && comments.length > 1 && (
                             <div className={`flex items-center gap-1 rounded-lg border p-1 ${darkMode ? 'border-slate-700/60 bg-slate-800/50' : 'border-slate-200 bg-white'}`}>
-                                <button type="button" onClick={() => setSelectedCommentIndex((current) => Math.max(0, current - 1))} disabled={selectedCommentIndex === 0} aria-label="Newer operator comment" title="Newer operator comment" className={`rounded-md p-1 ${darkMode ? 'text-slate-300 hover:bg-slate-700' : 'text-slate-500 hover:bg-slate-100'} disabled:opacity-30`}><ChevronLeft className="h-4 w-4" /></button>
+                                <button type="button" onClick={() => setSelectedCommentIndex((current) => Math.max(0, current - 1))} disabled={selectedCommentIndex === 0} aria-label="Latest operator comment" title="Latest operator comment" className={`rounded-md p-1 ${darkMode ? 'text-slate-300 hover:bg-slate-700' : 'text-slate-500 hover:bg-slate-100'} disabled:opacity-30`}><ChevronLeft className="h-4 w-4" /></button>
                                 <span className={`px-2 text-xs font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{selectedCommentIndex + 1} / {comments.length}</span>
-                                <button type="button" onClick={() => setSelectedCommentIndex((current) => Math.min(comments.length - 1, current + 1))} disabled={selectedCommentIndex === comments.length - 1} aria-label="Older operator comment" title="Older operator comment" className={`rounded-md p-1 ${darkMode ? 'text-slate-300 hover:bg-slate-700' : 'text-slate-500 hover:bg-slate-100'} disabled:opacity-30`}><ChevronRight className="h-4 w-4" /></button>
+                                <button type="button" onClick={() => setSelectedCommentIndex((current) => Math.min(comments.length - 1, current + 1))} disabled={selectedCommentIndex === comments.length - 1} aria-label="Previous generated operator comment" title="Previous generated operator comment" className={`rounded-md p-1 ${darkMode ? 'text-slate-300 hover:bg-slate-700' : 'text-slate-500 hover:bg-slate-100'} disabled:opacity-30`}><ChevronRight className="h-4 w-4" /></button>
                             </div>
                         )}
                         {generatedComment && <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-500">Latest generated</span>}
@@ -143,7 +160,15 @@ const InlineOperatorComments = ({ details, darkMode }) => {
                 </div>
 
                 {/* ACTION SECTION: Regenerate Form */}
-                <div className={`mt-4 rounded-xl border p-5 ${darkMode ? 'border-slate-700/60 bg-slate-800/40' : 'border-slate-200 bg-slate-50/80'}`}>
+                <div className={`relative mt-4 rounded-xl border p-5 ${darkMode ? 'border-slate-700/60 bg-slate-800/40' : 'border-slate-200 bg-slate-50/80'}`}>
+                    {isGenerating && (
+                        <div className={`absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 rounded-xl backdrop-blur-sm ${darkMode ? 'bg-[#111827]/90' : 'bg-white/90'}`}>
+                            <div className="cube-spinner h-10 w-10">
+                                {Array.from({ length: 6 }, (_, index) => <div key={index} />)}
+                            </div>
+                            <p className={`text-sm font-semibold ${darkMode ? 'text-slate-200' : 'text-slate-800'}`}>Operator comments will be displayed once the generation process is complete.</p>
+                        </div>
+                    )}
                     <label htmlFor={`operator-feedback-${details.id}`} className={`mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
                         Need changes? <span className="font-normal normal-case opacity-70">(Provide new feedback to regenerate)</span>
                     </label>
@@ -159,7 +184,7 @@ const InlineOperatorComments = ({ details, darkMode }) => {
                         <button
                             type="button"
                             onClick={handleSubmit}
-                            disabled={isLoading || !operatorFeedback.trim()}
+                            disabled={isLoading || isRegenerating || !operatorFeedback.trim()}
                             className="inline-flex items-center gap-2 rounded-lg bg-sky-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             <Sparkles className="h-4 w-4" />
@@ -173,7 +198,7 @@ const InlineOperatorComments = ({ details, darkMode }) => {
 
     return (
         <div className={`relative mt-5 border-t pt-5 ${darkMode ? 'border-slate-700/50' : 'border-slate-200/80'}`}>
-            {isLoading && (
+            {isGenerating && (
                 <div className={`absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 rounded-lg backdrop-blur-sm ${darkMode ? 'bg-[#111827]/90' : 'bg-white/90'}`}>
                     <div className="cube-spinner h-10 w-10">
                         {Array.from({ length: 6 }, (_, index) => <div key={index} />)}
@@ -185,14 +210,16 @@ const InlineOperatorComments = ({ details, darkMode }) => {
             <form onSubmit={handleSubmit} className="space-y-2">
                 <div>
                     <h4 className={`text-sm font-semibold ${darkMode ? 'text-sky-400' : 'text-sky-700'}`}>Operator Comments</h4>
-                    <p className={`mt-1 text-xs ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>No operator comments have been generated for this item.</p>
+                    <p className={`mt-1 text-xs ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>No operator comments generated.</p>
                 </div>
                 <div>
                     <label htmlFor={`operator-feedback-${details.id}`} className={`text-xs font-semibold uppercase tracking-wide ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>Operator feedback <span className="font-normal opacity-70">(optional)</span></label>
                     <textarea id={`operator-feedback-${details.id}`} value={operatorFeedback} onChange={(event) => setOperatorFeedback(event.target.value)} rows={3} placeholder="Your response to this observation..." className={`mt-2 w-full resize-none rounded-lg border px-4 py-3 text-sm outline-none transition focus:border-sky-500 focus:ring-1 focus:ring-sky-500 ${darkMode ? 'border-slate-600 bg-slate-900/80 text-slate-100 placeholder:text-slate-500' : 'border-slate-300 bg-white text-slate-900 placeholder:text-slate-400'}`} />
                 </div>
                 {errorMessage && <p className="text-sm text-rose-500">{errorMessage}</p>}
-                <button type="submit" disabled={isLoading} className="inline-flex items-center gap-2 rounded-lg bg-sky-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-60"><Sparkles className="h-4 w-4" />Generate operator comments</button>
+                <div className="flex justify-end">
+                    <button type="submit" disabled={isGenerating} className="inline-flex items-center gap-2 rounded-lg bg-sky-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-60"><Sparkles className="h-4 w-4" />Generate operator comments</button>
+                </div>
             </form>
         </div>
     );
@@ -579,19 +606,10 @@ const InspectionAccordionItem = ({ details, darkMode }) => {
                 className={`flex w-full items-start justify-between gap-4 p-5 text-left transition-colors sm:items-center ${darkMode ? 'hover:bg-slate-800/50' : 'hover:bg-slate-50'} ${isOpen ? (darkMode ? 'rounded-t-xl bg-slate-800/30' : 'rounded-t-xl bg-slate-50') : 'rounded-xl'}`}
             >
                 <div className="flex-1 pr-4">
-                    <div className="mb-2 flex flex-wrap items-center gap-3">
-                        <span className="rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-semibold uppercase text-amber-500">
-                            {details.type || 'N/A'}
-                        </span>
-                        <span className={`text-xs font-semibold uppercase tracking-wide ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
-                            {question?.tag}
-                        </span>
-                        <span className={`hidden text-xs font-semibold uppercase tracking-wide sm:inline-block ${darkMode ? 'text-slate-600' : 'text-slate-300'}`}>
-                            •
-                        </span>
-                        <span className={`text-xs font-semibold uppercase tracking-wide ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
-                            {details.category || 'N/A'}
-                        </span>
+                    <div className="mb-3 flex flex-wrap items-center gap-2">
+                        <MetadataBadge darkMode={darkMode} label="" value={details.type} accent="amber" />
+                        <MetadataBadge darkMode={darkMode} label="" value={question?.tag} accent="sky" />
+                        <MetadataBadge darkMode={darkMode} label="" value={details.category} />
                     </div>
                     <h3 className={`text-sm font-semibold leading-relaxed line-clamp-2 sm:text-md ${darkMode ? 'text-white' : 'text-slate-900'}`}>
                         {question?.question_no} - {question?.question ? question.question : (details.noc || 'Inspection item')}
@@ -607,15 +625,19 @@ const InspectionAccordionItem = ({ details, darkMode }) => {
                 <div className={`border-t p-5 sm:p-6 ${darkMode ? 'border-slate-700/60 bg-[#111827]/50' : 'border-slate-200 bg-white'}`}>
                     {/* Unified Details Block */}
                     <div className="rounded-lg bg-sky-500/5 p-5">
-                        <h4 className={`text-sm font-semibold ${darkMode ? 'text-sky-400' : 'text-sky-700'}`}>
-                            NOC: {details.noc || '--:--'}
-                        </h4>
-                        <p className={`mt-1 text-sm ${mutedTextClass}`}>
-                            SOC: {details.soc || '--:--'}
-                        </p>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                            <div className={`rounded-lg border px-4 py-3 ${darkMode ? 'border-sky-400/20 bg-slate-900/40' : 'border-sky-200/80 bg-white/80'}`}>
+                                <p className={`text-xs font-bold uppercase tracking-wider ${darkMode ? 'text-sky-400' : 'text-sky-700'}`}>NOC</p>
+                                <p className={`mt-1 text-sm font-semibold leading-6 ${darkMode ? 'text-slate-200' : 'text-slate-800'}`}>{details.noc || '--:--'}</p>
+                            </div>
+                            <div className={`rounded-lg border px-4 py-3 ${darkMode ? 'border-sky-400/20 bg-slate-900/40' : 'border-sky-200/80 bg-white/80'}`}>
+                                <p className={`text-xs font-bold uppercase tracking-wider ${darkMode ? 'text-sky-400' : 'text-sky-700'}`}>SOC</p>
+                                <p className={`mt-1 text-sm font-semibold leading-6 ${darkMode ? 'text-slate-200' : 'text-slate-800'}`}>{details.soc || '--:--'}</p>
+                            </div>
+                        </div>
 
                         {/* Divider */}
-                        <div className={`mt-2 border-t pt-5 ${darkMode ? 'border-slate-700/50' : 'border-slate-200/80'}`}>
+                        <div className={`mt-5 border-t pt-5 ${darkMode ? 'border-slate-700/50' : 'border-slate-200/80'}`}>
                             <dl className="grid gap-6 sm:grid-cols-2 lg:grid-cols-2">
                                 <DetailValue darkMode={darkMode} label="Response" value={observation?.response} />
                                 <DetailValue darkMode={darkMode} label="Remark" value={observation?.remark} />

@@ -169,7 +169,7 @@ const ReportUpload = ({ darkMode }) => {
                         className="flex w-full items-center justify-center gap-2 rounded-lg bg-sky-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/20 transition-colors hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         <FileUp className="h-4 w-4" />
-                        {isProcessing ? phaseCopy[phase].title : 'Upload and generate report'}
+                        {isProcessing ? phaseCopy[phase].title : 'Upload and generate operator comments'}
                     </button>
                 </form>
             </div>

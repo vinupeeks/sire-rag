@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AlertCircle, ArrowLeft, ClipboardList, Loader2, RefreshCw, ChevronDown, ChevronUp, Sparkles, X, ChevronLeft, ChevronRight, FileText, BookOpen } from 'lucide-react';
+import { AlertCircle, ArrowLeft, ClipboardList, Loader2, RefreshCw, ChevronDown, ChevronUp, Sparkles, X, ChevronLeft, ChevronRight, FileText, BookOpen, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useGetInspectionDetailsMutation } from '../../../redux/services/inspectionsApi';
 import { useFetchMutation } from '../../../redux/services/operatorCommentsApi';
@@ -40,7 +40,7 @@ const ANALYSIS_LOADING_MESSAGES = [
     'Consolidating final inspection report...',
 ];
 
-const InlineOperatorComments = ({ details, darkMode }) => {
+const InlineOperatorComments = ({ details, darkMode, onCommentGenerated }) => {
     const [submitComment, { isLoading }] = useFetchMutation();
     const [isRegenerating, setIsRegenerating] = useState(false);
     const [operatorFeedback, setOperatorFeedback] = useState('');
@@ -52,8 +52,8 @@ const InlineOperatorComments = ({ details, darkMode }) => {
     const observation = details.observation;
     const question = observation?.inspection_question?.question;
     const comments = details.comments || [];
-    const existingComment = comments[selectedCommentIndex];
-    const comment = generatedComment || existingComment;
+    const displayedComments = generatedComment ? [generatedComment, ...comments] : comments;
+    const comment = displayedComments[selectedCommentIndex];
     const isGenerating = isLoading || isRegenerating;
     const category = details.category ? details.category.charAt(0) + details.category.slice(1).toLowerCase() : '';
 
@@ -79,8 +79,11 @@ const InlineOperatorComments = ({ details, darkMode }) => {
                 operator_feedback: operatorFeedback,
                 findings_id: details.id,
             }).unwrap();
-            setGeneratedComment(response?.data || response);
+            const latestComment = response?.data || response;
+            setGeneratedComment(latestComment);
+            setSelectedCommentIndex(0);
             setOperatorFeedback('');
+            onCommentGenerated?.(latestComment);
         } catch (error) {
             setErrorMessage(error?.data?.message || 'Failed to generate operator comments. Please try again.');
         }
@@ -100,14 +103,14 @@ const InlineOperatorComments = ({ details, darkMode }) => {
                         )}
                     </div>
                     <div className="flex items-center gap-2">
-                        {!generatedComment && comments.length > 1 && (
+                        {displayedComments.length > 1 && (
                             <div className={`flex items-center gap-1 rounded-lg border p-1 ${darkMode ? 'border-slate-700/60 bg-slate-800/50' : 'border-slate-200 bg-white'}`}>
                                 <button type="button" onClick={() => setSelectedCommentIndex((current) => Math.max(0, current - 1))} disabled={selectedCommentIndex === 0} aria-label="Latest operator comment" title="Latest operator comment" className={`rounded-md p-1 ${darkMode ? 'text-slate-300 hover:bg-slate-700' : 'text-slate-500 hover:bg-slate-100'} disabled:opacity-30`}><ChevronLeft className="h-4 w-4" /></button>
-                                <span className={`px-2 text-xs font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{selectedCommentIndex + 1} / {comments.length}</span>
-                                <button type="button" onClick={() => setSelectedCommentIndex((current) => Math.min(comments.length - 1, current + 1))} disabled={selectedCommentIndex === comments.length - 1} aria-label="Previous generated operator comment" title="Previous generated operator comment" className={`rounded-md p-1 ${darkMode ? 'text-slate-300 hover:bg-slate-700' : 'text-slate-500 hover:bg-slate-100'} disabled:opacity-30`}><ChevronRight className="h-4 w-4" /></button>
+                                <span className={`px-2 text-xs font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{selectedCommentIndex + 1} / {displayedComments.length}</span>
+                                <button type="button" onClick={() => setSelectedCommentIndex((current) => Math.min(displayedComments.length - 1, current + 1))} disabled={selectedCommentIndex === displayedComments.length - 1} aria-label="Previous generated operator comment" title="Previous generated operator comment" className={`rounded-md p-1 ${darkMode ? 'text-slate-300 hover:bg-slate-700' : 'text-slate-500 hover:bg-slate-100'} disabled:opacity-30`}><ChevronRight className="h-4 w-4" /></button>
                             </div>
                         )}
-                        {generatedComment && <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-500">Latest generated</span>}
+                        {generatedComment && <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-500">Latest generated comment</span>}
                     </div>
                 </div>
 
@@ -585,12 +588,15 @@ const OperatorCommentsModal = ({ details, darkMode, onClose }) => {
     );
 };
 
-const InspectionAccordionItem = ({ details, darkMode }) => {
+const InspectionAccordionItem = ({ details, darkMode, latestGeneratedComment, onCommentGenerated }) => {
     const [isOpen, setIsOpen] = useState(false);
 
     const observation = details.observation;
     const question = observation?.inspection_question?.question;
     const mutedTextClass = darkMode ? 'text-slate-400' : 'text-slate-500';
+    const existingComments = Array.isArray(details.comments) ? details.comments : [];
+    const operatorCommentCount = existingComments.length + (latestGeneratedComment ? 1 : 0);
+    const hasGeneratedOperatorComment = operatorCommentCount > 0;
 
     // Format PIF string conditionally to avoid "undefined - undefined"
     const pifDetails = details.pif_no || details.pif_description
@@ -615,8 +621,16 @@ const InspectionAccordionItem = ({ details, darkMode }) => {
                         {question?.question_no} - {question?.question ? question.question : (details.noc || 'Inspection item')}
                     </h3>
                 </div>
-                <div className={`mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full sm:mt-0 ${darkMode ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-500'}`}>
-                    {isOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                <div className="mt-1 flex shrink-0 items-center gap-2 sm:mt-0">
+                    <span className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-semibold ${hasGeneratedOperatorComment
+                        ? (darkMode ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300' : 'border-emerald-200 bg-emerald-50 text-emerald-700')
+                        : (darkMode ? 'border-slate-600 bg-slate-800/70 text-slate-400' : 'border-slate-200 bg-slate-50 text-slate-500')}`}>
+                        {hasGeneratedOperatorComment && <CheckCircle2 className="h-3.5 w-3.5" />}
+                        {operatorCommentCount} {operatorCommentCount === 1 ? 'Comment Generated' : 'Comments Generated'}
+                    </span>
+                    <div className={`flex h-8 w-8 items-center justify-center rounded-full ${darkMode ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-500'}`}>
+                        {isOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                    </div>
                 </div>
             </button>
 
@@ -640,13 +654,13 @@ const InspectionAccordionItem = ({ details, darkMode }) => {
                         <div className={`mt-5 border-t pt-5 ${darkMode ? 'border-slate-700/50' : 'border-slate-200/80'}`}>
                             <dl className="grid gap-6 sm:grid-cols-2 lg:grid-cols-2">
                                 <DetailValue darkMode={darkMode} label="Response" value={observation?.response} />
-                                <DetailValue darkMode={darkMode} label="Remark" value={observation?.remark} />
+                                <DetailValue darkMode={darkMode} label="Inspector Remark" value={observation?.remark} />
                                 {pifDetails && (
                                     <DetailValue darkMode={darkMode} label="PIF Details" value={pifDetails} />
                                 )}
                             </dl>
                         </div>
-                        <InlineOperatorComments details={details} darkMode={darkMode} />
+                        <InlineOperatorComments details={details} darkMode={darkMode} onCommentGenerated={onCommentGenerated} />
                     </div>
                 </div>
             )}
@@ -657,7 +671,16 @@ const InspectionAccordionItem = ({ details, darkMode }) => {
 const InspectionDetails = ({ darkMode, inspectionId }) => {
     const navigate = useNavigate();
     const [getDetails, { data: response, isLoading, isError }] = useGetInspectionDetailsMutation();
-    const loadDetails = useCallback(() => getDetails(inspectionId), [getDetails, inspectionId]);
+    const [latestGeneratedComments, setLatestGeneratedComments] = useState({});
+    const loadDetails = useCallback(async () => {
+        const result = await getDetails(inspectionId);
+        setLatestGeneratedComments({});
+        return result;
+    }, [getDetails, inspectionId]);
+
+    const handleCommentGenerated = useCallback((detailsId, comment) => {
+        setLatestGeneratedComments((current) => ({ ...current, [detailsId]: comment }));
+    }, []);
 
     useEffect(() => {
         loadDetails();
@@ -745,6 +768,8 @@ const InspectionDetails = ({ darkMode, inspectionId }) => {
                                     key={details.id}
                                     details={details}
                                     darkMode={darkMode}
+                                    latestGeneratedComment={latestGeneratedComments[details.id]}
+                                    onCommentGenerated={(comment) => handleCommentGenerated(details.id, comment)}
                                 />
                             ))}
                         </div>

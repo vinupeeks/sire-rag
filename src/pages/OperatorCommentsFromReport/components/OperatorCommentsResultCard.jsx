@@ -38,7 +38,7 @@ const OperatorCommentsResultCard = ({ darkMode, title, resultKey, content }) => 
                     onClick={handleCopy}
                     title={`Copy ${title.toLowerCase()}`}
                     aria-label={`Copy ${title.toLowerCase()}`}
-                    className={`rounded-md p-1.5 transition-all ${darkMode ? 'text-slate-400 hover:bg-slate-700 hover:text-slate-200' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-800'} ${copied ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 focus:opacity-100'}`}
+                    className={`rounded-md p-1.5 transition-all ${darkMode ? 'text-slate-400 hover:bg-slate-700 hover:text-slate-200' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-800'}`}
                 >
                     {copied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
                 </button>

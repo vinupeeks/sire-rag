@@ -246,8 +246,10 @@ const History = ({ darkMode }) => {
                                         : 'bg-slate-50 text-slate-500 border-b border-slate-200'
                                         }`}
                                 >
+                                    <th className="p-4 font-semibold w-32">Vessel</th>
+                                    <th className="p-4 font-semibold w-30">Inspection Date</th>
                                     <th className="p-4 font-semibold w-24">VIQ</th>
-                                    <th className="p-4 font-semibold w-32">Category</th>
+                                    <th className="p-4 font-semibold w-24">Category</th>
                                     <th className="p-4 font-semibold">Comment</th>
                                     <th className="p-4 font-semibold">Response</th>
                                     <th className="p-4 font-semibold w-40">Date</th>
@@ -268,6 +270,20 @@ const History = ({ darkMode }) => {
                                                     : 'border-b border-slate-200 hover:bg-slate-50'
                                                     } ${isExpanded && (darkMode ? 'bg-slate-800/20' : 'bg-slate-50/50')}`}
                                             >
+
+                                                {/* Vessel */}
+                                                <td className={`p-4 text-sm font-medium ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                                                    {item?.finding?.observation?.inspection_question?.inspection?.vessel?.name || 'N/A'}
+                                                </td>
+
+                                                {/* Inspection Date */}
+                                                <td className={`p-4 text-sm font-medium ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                                                    {item?.finding?.observation?.inspection_question?.inspection?.inspection_date
+                                                        ? new Date(item.finding.observation.inspection_question.inspection.inspection_date)
+                                                            .toLocaleDateString('en-GB')
+                                                        : 'N/A'}
+                                                </td>
+
                                                 {/* VIQ */}
                                                 <td className={`p-4 text-sm font-medium ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
                                                     {item.question_number || 'N/A'}
@@ -327,7 +343,7 @@ const History = ({ darkMode }) => {
                                             {/* Expanded AI Details Row */}
                                             {isExpanded && (
                                                 <tr className={`${darkMode ? 'bg-[#111827]' : 'bg-white'}`}>
-                                                    <td colSpan="5" className={`p-0 border-b ${darkMode ? 'border-slate-700/50' : 'border-slate-200'}`}>
+                                                    <td colSpan="8" className={`p-0 border-b ${darkMode ? 'border-slate-700/50' : 'border-slate-200'}`}>
                                                         <div className="p-6">
                                                             {/* Extra metadata and Full Comment */}
                                                             <div className="flex flex-col mb-2 gap-4">

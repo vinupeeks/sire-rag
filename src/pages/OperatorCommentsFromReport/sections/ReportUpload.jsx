@@ -34,6 +34,7 @@ const ReportUpload = ({ darkMode }) => {
             return;
         }
         setSelectedFile(file);
+        handleUpload(file);
     };
 
     const handleFileChange = (event) => {
@@ -64,14 +65,13 @@ const ReportUpload = ({ darkMode }) => {
         processSelectedFile(droppedFile);
     };
 
-    const handleUpload = async (event) => {
-        event.preventDefault();
-        if (!selectedFile || isProcessing) return;
+    const handleUpload = async (file = selectedFile) => {
+        if (!file || isProcessing) return;
 
         try {
             setPhase('uploading');
             const formData = new FormData();
-            formData.append('file', selectedFile);
+            formData.append('file', file);
             const uploadResponse = await uploadInspectionPdf(formData).unwrap();
             const filename = uploadResponse?.file?.filename;
 
@@ -112,7 +112,7 @@ const ReportUpload = ({ darkMode }) => {
                     </div>
                 </div>
 
-                <form onSubmit={handleUpload} className="space-y-6 p-6">
+                <form onSubmit={(event) => event.preventDefault()} className="space-y-6 p-6">
                     <input ref={inputRef} type="file" accept="application/pdf,.pdf" onChange={handleFileChange} className="sr-only" disabled={isProcessing} />
 
                     <button
@@ -163,14 +163,9 @@ const ReportUpload = ({ darkMode }) => {
                         </div>
                     )}
 
-                    <button
-                        type="submit"
-                        disabled={!selectedFile || isProcessing}
-                        className="flex w-full items-center justify-center gap-2 rounded-lg bg-sky-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/20 transition-colors hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                        <FileUp className="h-4 w-4" />
-                        {isProcessing ? phaseCopy[phase].title : 'Upload and generate operator comments'}
-                    </button>
+                    {selectedFile && !isProcessing && (
+                        <p className={`text-center text-sm ${mutedTextClass}`}>Your report is ready to process.</p>
+                    )}
                 </form>
             </div>
         </section>

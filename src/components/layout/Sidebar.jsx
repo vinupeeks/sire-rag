@@ -17,6 +17,7 @@ const Sidebar = ({
     actionButtonLabel = 'New chat',
     onMenuItemClick = () => { },
     showConversations = true,
+    showActionButton = true,
     sidebarTitle = 'SMS Search',
     sidebarSubtitle,
 }) => {
@@ -133,7 +134,7 @@ const Sidebar = ({
             )}
 
             {/* New Chat Action Layer */}
-            {!collapsed ? (
+            {showActionButton && !collapsed ? (
                 <div className="px-3 py-3">
                     <Button
                         variant="default"
@@ -145,7 +146,7 @@ const Sidebar = ({
                         <span className="sm:hidden">New</span>
                     </Button>
                 </div>
-            ) : (
+            ) : showActionButton ? (
                 <div className="flex flex-col items-center gap-2 py-3">
                     <Button
                         variant="ghost"
@@ -156,7 +157,7 @@ const Sidebar = ({
                         <Plus className="h-4 w-4" />
                     </Button>
                 </div>
-            )}
+            ) : null}
 
             {/* Chat List Stream */}
             {showConversations && (

@@ -85,7 +85,7 @@ const LoginPage = () => {
               </span>
             </h2>
 
-            <span className="block bg-gradient-to-r from-gray-400 to-gray-400 bg-clip-text text-transparent">
+            <span className="block bg-gradient-to-r from-cyan-300 to-blue-300 bg-clip-text text-lg font-semibold text-transparent">
               Draft operator comments and search the safety management system, in one place.
             </span>
 
@@ -106,7 +106,7 @@ const LoginPage = () => {
                   Safety Management Search
                 </h3>
                 <p className="text-[14px] leading-5 text-[#8eb5d8]">
-                  Procedures, VIQ, findings
+                  Procedures, file uploads & chat
                 </p>
               </div>
             </div>

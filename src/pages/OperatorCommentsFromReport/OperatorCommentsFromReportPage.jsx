@@ -77,12 +77,13 @@ const OperatorCommentsFromReportPage = () => {
                         onToggle={() => setSidebarCollapsed((previous) => !previous)}
                         menuItems={menuItems.map((item) => ({ ...item, isActive: item.id === activeMenuItem.id }))}
                         actionButtonLabel="New inspection"
+                        showActionButton={false}
                         onMenuItemClick={(menuItemId) => {
                             const item = menuItems.find((menuEntry) => menuEntry.id === menuItemId);
                             if (item) navigate(item.path);
                         }}
                         showConversations={false}
-                        sidebarTitle="Comments from Report"
+                        sidebarTitle="Operator Comments"
                         sidebarSubtitle="Assistant"
                     />
                 )}

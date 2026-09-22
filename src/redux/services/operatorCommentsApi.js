@@ -8,7 +8,7 @@ export const operatorComments = createApi({
     endpoints: (builder) => ({
         fetch: builder.mutation({
             query: (data) => ({
-                url: `/api/operator-comments/fetch`,
+                url: `/api/operator-comments/fetchjson`,
                 method: 'POST',
                 body: data
             }),

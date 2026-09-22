@@ -11,6 +11,15 @@ export default {
           foam: '#e0f2fe',
         },
       },
+      fontFamily: {
+        sans: ['Red Hat Display', 'Noto Sans Malayalam', 'sans-serif'],
+        montserrat: ['Montserrat', 'sans-serif'],
+        poppins: ['Poppins', 'sans-serif'],
+        'red-hat': ['Red Hat Display', 'sans-serif'],
+      },
+      fontSize: {
+        xs: '12px',
+      },
       boxShadow: {
         soft: '0 28px 80px rgba(15, 23, 42, 0.18)',
       },

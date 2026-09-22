@@ -12,6 +12,18 @@ export const inspectionsApi = createApi({
                 body: data,
             }),
         }),
+        listArchivedInspections: builder.mutation({
+            query: (data) => ({
+                url: '/api/inspections/archived',
+                method: 'GET',
+            }),
+        }),
+        archiveInspection: builder.mutation({
+            query: (data) => ({
+                url: `/api/inspections/archive/${data.id}`,
+                method: 'PUT',
+            }),
+        }),
         getInspectionDetails: builder.mutation({
             query: (inspectionId) => ({
                 url: `/api/inspections/details/${inspectionId}`,
@@ -37,6 +49,8 @@ export const inspectionsApi = createApi({
 
 export const {
     useListInspectionsMutation,
+    useListArchivedInspectionsMutation,
+    useArchiveInspectionMutation,
     useGetInspectionDetailsMutation,
     useUploadInspectionPdfMutation,
     useExtractInspectionPdfMutation,

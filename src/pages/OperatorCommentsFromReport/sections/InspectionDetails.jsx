@@ -38,6 +38,7 @@ const ANALYSIS_LOADING_MESSAGES = [
     'Mapping findings to SIRE 2.0 guidelines...',
     'Formulating targeted corrective measures...',
     'Consolidating final inspection report...',
+    'Finalizing analysis (Estimated: 1–2 minutes)...',
 ];
 
 const InlineOperatorComments = ({ details, darkMode, onCommentGenerated }) => {
@@ -193,14 +194,26 @@ const InlineOperatorComments = ({ details, darkMode, onCommentGenerated }) => {
 
                 {/* ACTION SECTION: Regenerate Form */}
                 <div className={`relative mt-4 rounded-xl border p-5 ${darkMode ? 'border-slate-700/60 bg-slate-800/40' : 'border-slate-200 bg-slate-50/80'}`}>
+
                     {isGenerating && (
-                        <div className={`absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 rounded-xl backdrop-blur-sm ${darkMode ? 'bg-[#111827]/90' : 'bg-white/90'}`}>
+                        <div className={`absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 rounded-xl p-6 text-center backdrop-blur-md ${darkMode ? 'bg-[#111827]/95' : 'bg-white/95'}`}>
                             <div className="cube-spinner h-10 w-10">
                                 {Array.from({ length: 6 }, (_, index) => <div key={index} />)}
                             </div>
-                            <p className={`text-sm font-semibold ${darkMode ? 'text-slate-200' : 'text-slate-800'}`}>Operator comments will be displayed once the generation process is complete.</p>
+                            <div className="space-y-1">
+                                <p className={`text-sm font-bold ${darkMode ? 'text-slate-100' : 'text-slate-900'}`}>
+                                    Generating Operator Comments (~1–2 mins)
+                                </p>
+                                <p className={`text-xs font-medium animate-pulse ${darkMode ? 'text-sky-400' : 'text-sky-600'}`}>
+                                    {ANALYSIS_LOADING_MESSAGES[messageIndex]}
+                                </p>
+                            </div>
+                            <p className={`max-w-md text-xs leading-relaxed opacity-80 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                                You can safely collapse this section, review other inspection questions, or work on other tasks while this processes in the background.
+                            </p>
                         </div>
                     )}
+
                     <label htmlFor={`operator-feedback-${details.id}`} className={`mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
                         Need changes? <span className="font-normal normal-case opacity-70">(Provide new feedback to regenerate)</span>
                     </label>
@@ -212,6 +225,9 @@ const InlineOperatorComments = ({ details, darkMode, onCommentGenerated }) => {
                         placeholder="Add context, correct the timeline, or provide specific instructions..."
                         className={`w-full resize-none rounded-lg border px-4 py-3 text-sm outline-none transition focus:border-sky-500 focus:ring-1 focus:ring-sky-500 ${darkMode ? 'border-slate-600 bg-slate-900/80 text-slate-100 placeholder:text-slate-500' : 'border-slate-300 bg-white text-slate-900 placeholder:text-slate-400'}`}
                     />
+                    <span className="text-sm text-slate-500">
+                        This is an optional section. If you have any specific comments on this observation, we can include that in the draft comments generated.
+                    </span>
                     <div className="mt-3 flex justify-end">
                         <button
                             type="button"
@@ -230,15 +246,26 @@ const InlineOperatorComments = ({ details, darkMode, onCommentGenerated }) => {
 
     return (
         <div className={`relative mt-5 border-t pt-5 ${darkMode ? 'border-slate-700/50' : 'border-slate-200/80'}`}>
+           
             {isGenerating && (
-                <div className={`absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 rounded-lg backdrop-blur-sm ${darkMode ? 'bg-[#111827]/90' : 'bg-white/90'}`}>
+                <div className={`absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 rounded-xl p-6 text-center backdrop-blur-md ${darkMode ? 'bg-[#111827]/95' : 'bg-white/95'}`}>
                     <div className="cube-spinner h-10 w-10">
                         {Array.from({ length: 6 }, (_, index) => <div key={index} />)}
                     </div>
-                    <p className={`text-sm font-semibold ${darkMode ? 'text-slate-200' : 'text-slate-800'}`}>Operator comments will be displayed once the generation process is complete.</p>
-                    {/* <p className={`text-xs ${darkMode ? 'text-sky-400' : 'text-sky-600'}`}>{ANALYSIS_LOADING_MESSAGES[messageIndex]}</p> */}
+                    <div className="space-y-1">
+                        <p className={`text-sm font-bold ${darkMode ? 'text-slate-100' : 'text-slate-900'}`}>
+                            Generating Operator Comments (~1–2 mins)
+                        </p>
+                        <p className={`text-xs font-medium animate-pulse ${darkMode ? 'text-sky-400' : 'text-sky-600'}`}>
+                            {ANALYSIS_LOADING_MESSAGES[messageIndex]}
+                        </p>
+                    </div>
+                    <p className={`max-w-md text-xs leading-relaxed opacity-80 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                        You can safely collapse this section, review other inspection questions, or work on other tasks while this processes in the background.
+                    </p>
                 </div>
             )}
+
             <form onSubmit={handleSubmit} className="space-y-2">
                 <div>
                     <h4 className={`text-sm font-semibold ${darkMode ? 'text-sky-400' : 'text-sky-700'}`}>Draft Operator Comments</h4>
@@ -247,6 +274,9 @@ const InlineOperatorComments = ({ details, darkMode, onCommentGenerated }) => {
                     <label htmlFor={`operator-feedback-${details.id}`} className={`text-xs font-semibold uppercase tracking-wide ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>Operator feedback <span className="font-normal opacity-70">(optional)</span></label>
                     <textarea id={`operator-feedback-${details.id}`} value={operatorFeedback} onChange={(event) => setOperatorFeedback(event.target.value)} rows={3} placeholder="Your response to this observation..." className={`mt-2 w-full resize-none rounded-lg border px-4 py-3 text-sm outline-none transition focus:border-sky-500 focus:ring-1 focus:ring-sky-500 ${darkMode ? 'border-slate-600 bg-slate-900/80 text-slate-100 placeholder:text-slate-500' : 'border-slate-300 bg-white text-slate-900 placeholder:text-slate-400'}`} />
                 </div>
+                <span className="text-sm text-slate-500">
+                    This is an optional section. If you have any specific comments on this observation, we can include that in the draft comments generated.
+                </span>
                 {errorMessage && <p className="text-sm text-rose-500">{errorMessage}</p>}
                 <div className="flex justify-end">
                     <button type="submit" disabled={isGenerating} className="inline-flex items-center gap-2 rounded-lg bg-sky-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-60"><Sparkles className="h-4 w-4" />Generate operator comments</button>
@@ -730,8 +760,9 @@ const InspectionDetails = ({ darkMode, inspectionId }) => {
         loadDetails();
     }, [loadDetails]);
 
-    const detailItems = response?.data?.items || (response?.data ? [response.data] : []);
     const inspection = response?.inspection || {};
+    const rawItems = response?.data?.items || (response?.data ? [response.data] : []);
+    const detailItems = [...rawItems].sort((a, b) => a.id - b.id);
 
     const panelClass = darkMode ? 'border-slate-700/60 bg-[#1a2233]' : 'border-slate-200 bg-white';
     const mutedTextClass = darkMode ? 'text-slate-400' : 'text-slate-500';

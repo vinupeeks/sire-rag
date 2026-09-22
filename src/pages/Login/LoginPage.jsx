@@ -39,6 +39,7 @@ const LoginPage = () => {
       });
 
       if (response?.data?.success) {
+        console.log(response.data.data)
         dispatch(setUser(response.data.data));
         navigate(ROUTES.OPERATOR_COMMENTS_FROM_REPORT_INSPECTIONS);
       } else {

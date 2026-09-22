@@ -12,6 +12,7 @@ import Inspections from './sections/Inspections';
 import ReportUpload from './sections/ReportUpload';
 import History from './sections/History';
 import InspectionDetails from './sections/InspectionDetails';
+import ArchivedInspectionDetails from './sections/ArchivedInspectionDetails';
 
 const menuItems = [
     { id: 'inspections', label: 'Inspections', icon: ClipboardList, path: ROUTES.OPERATOR_COMMENTS_FROM_REPORT_INSPECTIONS },
@@ -46,7 +47,10 @@ const OperatorCommentsFromReportPage = () => {
 
     const renderSection = () => {
         if (inspectionDetailsMatch) {
-            return <InspectionDetails darkMode={darkMode} inspectionId={inspectionDetailsMatch[1]} />;
+            const isHistoryDetails = location.state?.fromHistory === true;
+            return isHistoryDetails
+                ? <ArchivedInspectionDetails darkMode={darkMode} inspectionId={inspectionDetailsMatch[1]} />
+                : <InspectionDetails darkMode={darkMode} inspectionId={inspectionDetailsMatch[1]} />;
         }
 
         if (isReportUploadPage) {

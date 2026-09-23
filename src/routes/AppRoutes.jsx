@@ -3,6 +3,7 @@ import ProtectedRoute from './ProtectedRoute';
 import PublicRoute from './PublicRoute';
 import { ROUTES } from '../constants/routes';
 import ChatPage from '../pages/Chat/ChatPage';
+import KnowledgeSourcesPage from '../pages/KnowledgeSources/KnowledgeSourcesPage';
 import LoginPage from '../pages/Login/LoginPage';
 import OperatorCommentsPage from '../pages/OperatorComments/OperatorCommentsPage';
 import OperatorCommentsFromReportPage from '../pages/OperatorCommentsFromReport/OperatorCommentsFromReportPage';
@@ -14,6 +15,7 @@ const AppRoutes = () => (
     <Route path={ROUTES.OPERATOR_COMMENTS_FROM_REPORT} element={<Navigate to={ROUTES.OPERATOR_COMMENTS_FROM_REPORT_INSPECTIONS} replace />} />
     <Route path={`${ROUTES.OPERATOR_COMMENTS_FROM_REPORT}/*`} element={<ProtectedRoute> <OperatorCommentsFromReportPage /> </ProtectedRoute>} />
     <Route path={ROUTES.CHAT} element={<ProtectedRoute> <ChatPage /> </ProtectedRoute>} />
+    <Route path={ROUTES.KNOWLEDGE_SOURCES} element={<ProtectedRoute> <KnowledgeSourcesPage /> </ProtectedRoute>} />
     <Route path="*" element={<Navigate to={ROUTES.OPERATOR_COMMENTS_FROM_REPORT_INSPECTIONS} replace />} />
   </Routes>
 );

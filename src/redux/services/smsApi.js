@@ -17,6 +17,16 @@ export const smsApi = createApi({
             }),
         }),
 
+        getOcimfFiles: builder.query({
+            query: (userId) => ({
+                url: `/api/rag/ocimf-files`,
+                method: 'GET',
+                params: {
+                    user_id: Number(userId),
+                },
+            }),
+        }),
+
         uploadPdf: builder.mutation({
             query: (formData) => ({
                 url: `/api/rag/upload-document`,
@@ -28,6 +38,18 @@ export const smsApi = createApi({
         deletePdf: builder.mutation({
             query: (data) => ({
                 url: `/api/rag/delete-single-file`,
+                method: 'DELETE',
+                body: {
+                    user_id: data.user_id,
+                    file_name: data.file_name,
+                },
+            }),
+            invalidatesTags: ['PDF'],
+        }),
+
+        deleteOcimfFile: builder.mutation({
+            query: (data) => ({
+                url: `/api/rag/delete-file`,
                 method: 'DELETE',
                 body: {
                     user_id: data.user_id,
@@ -50,7 +72,9 @@ export const smsApi = createApi({
 
 export const {
     useGetPdfListQuery,
+    useGetOcimfFilesQuery,
     useUploadPdfMutation,
     useDeletePdfMutation,
+    useDeleteOcimfFileMutation,
     useQueryChatMutation,
 } = smsApi;

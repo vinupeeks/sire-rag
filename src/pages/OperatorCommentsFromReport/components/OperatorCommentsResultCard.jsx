@@ -43,7 +43,7 @@ const OperatorCommentsResultCard = ({ darkMode, title, resultKey, content }) => 
                     {copied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
                 </button>
             </div>
-            <p className={`whitespace-pre-wrap text-xs leading-relaxed ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>{content || '--:--'}</p>
+            <p className={`whitespace-pre-wrap text-sm leading-relaxed ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>{content || '--:--'}</p>
         </div>
     );
 };

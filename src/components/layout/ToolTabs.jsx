@@ -37,7 +37,9 @@ const ToolTabs = () => {
         ? 'operator-comments-from-report'
         : location.pathname === ROUTES.OPERATOR_COMMENTS
             ? 'operator-comments'
-            : 'ai-search';
+            : location.pathname.startsWith(ROUTES.KNOWLEDGE_SOURCES)
+                ? null
+                : 'ai-search';
 
     return (
         <div

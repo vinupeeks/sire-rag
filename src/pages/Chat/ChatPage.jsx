@@ -4,15 +4,10 @@ import LayoutShell from '../../components/layout/LayoutShell';
 import Sidebar from '../../components/layout/Sidebar';
 import ToolTabs from '../../components/layout/ToolTabs';
 import ChatArea from '../../components/chat/ChatArea';
-import KnowledgeBaseView from '../../components/Files/KnowledgeBaseView';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../redux/reducers/authReducers';
-import { MessageSquare, FolderOpen } from 'lucide-react';
-import { toast } from "sonner";
+import { MessageSquare } from 'lucide-react';
 import {
-    useGetPdfListQuery,
-    useUploadPdfMutation,
-    useDeletePdfMutation,
     useQueryChatMutation,
 } from '../../redux/services/smsApi';
 import ConfirmationModal from '../../common/ConfirmationModal';
@@ -33,19 +28,11 @@ const ChatPage = () => {
 
     const [activeTab, setActiveTab] = useState('chat');
 
-    const [uploadPdfMutation, { isLoading: isUploading }] = useUploadPdfMutation();
-    const [deletePdfMutation] = useDeletePdfMutation();
     const [queryChatMutation] = useQueryChatMutation();
-    const {
-        data: pdfResponse,
-        isLoading: isPdfLoading,
-        refetch: refetchPdfs,
-    } = useGetPdfListQuery(user?.id);
 
     const [conversations, setConversations] = useState([initialConversation]);
     const [activeConversationId, setActiveConversationId] = useState(initialConversation.id);
     const [conversationSearch, setConversationSearch] = useState('');
-    const [pdfSearch, setPdfSearch] = useState('');
     const [isChatLoading, setIsChatLoading] = useState(false);
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [confirmConfig, setConfirmConfig] = useState({
@@ -54,8 +41,6 @@ const ChatPage = () => {
         message: '',
         onConfirm: () => { },
     });
-
-    const pdfs = pdfResponse?.data || [];
 
     useEffect(() => {
         if (!user) {
@@ -159,52 +144,6 @@ const ChatPage = () => {
         }
     };
 
-    const handleUploadPdf = async (file) => {
-        if (!file) return;
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('user_id', user?.id);
-        formData.append('chapter_number', 0);
-
-        try {
-            const response = await uploadPdfMutation(formData).unwrap();
-            if (response.status) {
-                refetchPdfs();
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const handleDeletePdf = (data) => {
-        setConfirmConfig({
-            isOpen: true,
-            title: 'Delete Document',
-            message: `Are you sure you want to permanently delete "${data?.fileName}"? This action cannot be undone.`,
-            onConfirm: async () => {
-                try {
-                    await deletePdfMutation({
-                        user_id: Number(user?.id),
-                        file_name: data?.fileName,
-                    }).unwrap();
-                    refetchPdfs();
-                    
-                    toast.success("Document deleted", {
-                        style: {
-                            background: "#567aa7",
-                            color: "#fff",
-                            border: "1px solid #15803d",
-                        },
-                    });
-                } catch (error) {
-                    console.error('Error deleting PDF:', error);
-                } finally {
-                    setConfirmConfig(prev => ({ ...prev, isOpen: false }));
-                }
-            }
-        });
-    };
-
     const logoutFn = () => {
         setConfirmConfig({
             isOpen: true,
@@ -218,19 +157,13 @@ const ChatPage = () => {
         });
     };
 
-    // SMS sidebar menu items
+    // SMS Search only contains conversation navigation.
     const smsSidebarMenuItems = [
         {
             id: 'chat',
             label: 'SMS Chat',
             icon: MessageSquare,
             isActive: activeTab === 'chat',
-        },
-        {
-            id: 'files',
-            label: 'SMS Search library',
-            icon: FolderOpen,
-            isActive: activeTab === 'files',
         },
     ];
 
@@ -253,16 +186,7 @@ const ChatPage = () => {
                             onSend={handleSendMessage}
                         />
                     </div>
-                ) : (
-                    <KnowledgeBaseView
-                        pdfs={pdfs}
-                        searchTerm={pdfSearch}
-                        onSearch={setPdfSearch}
-                        onUpload={handleUploadPdf}
-                        onDelete={handleDeletePdf}
-                        isUploading={isUploading}
-                    />
-                )}
+                ) : null}
             </div>
         </div>
     );

@@ -62,7 +62,7 @@ const KnowledgeBaseView = ({
             {/* Header Title Section */}
             <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b pb-5 mb-6 ${theme.border}`}>
                 <div>
-                    <h1 className={`text-xl font-bold tracking-wide ${theme.textPrimary}`}>Knowledge Base Sources</h1>
+                    <h1 className={`text-xl font-bold tracking-wide ${theme.textPrimary}`}>Company Files</h1>
                     <p className={`text-xs mt-1 ${theme.textSecondary}`}>
                         Manage documents used by your AI assistant.
                     </p>

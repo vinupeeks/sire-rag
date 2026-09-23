@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Plus, Settings, User, LogOut, ChevronLeft, ChevronRight, Sun, Moon } from 'lucide-react';
+import { Plus, Settings, User, LogOut, ChevronLeft, ChevronRight, Sun, Moon, Database } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '../ui/Button';
 import { useDispatch, useSelector } from 'react-redux';
 import { toggleDarkMode } from '../../redux/reducers/dataReducers';
+import { ROUTES } from '../../constants/routes';
 import Logo from '../../assets/logo.png';
 
 const Sidebar = ({
@@ -22,6 +24,8 @@ const Sidebar = ({
     sidebarSubtitle,
 }) => {
     const dispatch = useDispatch();
+    const location = useLocation();
+    const navigate = useNavigate();
     const darkMode = useSelector((state) => state.data.darkMode);
     const user = useSelector((state) => state.auth.user);
 
@@ -50,7 +54,7 @@ const Sidebar = ({
         avatarInactive: darkMode ? 'bg-[#2d394d] text-slate-300' : 'bg-slate-200 text-slate-600',
 
         // Control Interfaces
-        footerBg: darkMode ? 'bg-[#445c85]' : 'bg-[#e9eff5]/90',
+        footerBg: darkMode ? 'bg-[#445c85]' : 'bg-[#dae7f4]',
         cardBg: darkMode ? 'bg-[#273346] border-slate-700/50' : 'bg-white border-[#e2e8f0]',
         actionBtn: darkMode
             ? 'bg-sky-500 text-white hover:bg-sky-400 shadow-md'
@@ -203,6 +207,21 @@ const Sidebar = ({
 
             {/* Footer / Profile Information Block */}
             <div className={`border-t rounded-t-[24px] px-2 py-2 ${theme.border} ${theme.footerBg}`}>
+                <Button
+                    variant="ghost"
+                    onClick={() => navigate(ROUTES.KNOWLEDGE_SOURCES)}
+                    className={`mb-2 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold transition-colors ${location.pathname.startsWith(ROUTES.KNOWLEDGE_SOURCES)
+                        ? 'bg-[#0091ff] !text-white shadow-sm shadow-[#0091ff]/20'
+                        : darkMode
+                            ? '!text-slate-300 hover:bg-[#273346] hover:!text-slate-100'
+                            : '!text-slate-600 hover:bg-slate-200/60 hover:!text-slate-900'
+                        } ${collapsed ? 'justify-center px-0' : 'justify-start'}`}
+                    title="Knowledge Sources"
+                >
+                    <Database className="h-4 w-4 flex-shrink-0" />
+                    {!collapsed && <span >KNOWLEDGE SOURCES</span>}
+                </Button>
+
                 {!collapsed ? (
                     <div className={`flex items-center justify-between gap-2 rounded-xl p-1.5 border ${theme.cardBg}`}>
                         <div className="flex min-w-0 flex-1 items-center gap-2">

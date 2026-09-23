@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useGetInspectionDetailsMutation } from '../../../redux/services/inspectionsApi';
 import { ROUTES } from '../../../constants/routes';
 import OperatorCommentsResultCard from '../components/OperatorCommentsResultCard';
+import ReactMarkdown from 'react-markdown';
 
 const formatDate = (value) => {
     if (!value) return 'Date unavailable';
@@ -142,13 +143,26 @@ const ArchivedInspectionItem = ({ details, darkMode }) => {
                                     {isSourcesOpen && (
                                         <div className={`mt-3 space-y-3 border-t pt-3 ${darkMode ? 'border-slate-700/60' : 'border-slate-200'}`}>
                                             {comment.sources.map((source, index) => (
-                                                <div key={source.ref || index} className={`rounded-lg border p-3 ${darkMode ? 'border-slate-700/50 bg-[#1a2233]' : 'border-slate-200 bg-white'}`}>
+                                                <div key={source.filename || source.ref || index} className={`rounded-lg border p-3 ${darkMode ? 'border-slate-700/50 bg-[#1a2233]' : 'border-slate-200 bg-white'}`}>
                                                     <div className="mb-2 flex items-center gap-2">
                                                         <FileText className="h-3.5 w-3.5 text-sky-500" />
-                                                        <span className="text-xs font-semibold text-sky-500">{source.ref || `Source ${index + 1}`}</span>
+                                                        <span className="text-xs font-semibold text-sky-500">{source.filename || source.ref || `Source ${index + 1}`}</span>
                                                     </div>
-                                                    {source.filename && <p className={`mb-2 truncate text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>File: {source.filename}</p>}
-                                                    <p className={`whitespace-pre-wrap text-xs leading-relaxed ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>{source.snippet || '--:--'}</p>
+                                                    <ReactMarkdown
+                                                        components={{
+                                                            p: ({ children }) => (
+                                                                <p className="mb-2">{children}</p>
+                                                            ),
+                                                            h3: ({ children }) => (
+                                                                <h3 className="mb-2 mt-3 font-semibold">{children}</h3>
+                                                            ),
+                                                            strong: ({ children }) => (
+                                                                <strong className="font-semibold">{children}</strong>
+                                                            ),
+                                                        }}
+                                                    >
+                                                        {source.snippet || '--:--'}
+                                                    </ReactMarkdown>
                                                 </div>
                                             ))}
                                         </div>

@@ -5,6 +5,7 @@ import { useGetInspectionDetailsMutation } from '../../../redux/services/inspect
 import { useFetchMutation } from '../../../redux/services/operatorCommentsApi';
 import { ROUTES } from '../../../constants/routes';
 import OperatorCommentsResultCard from '../components/OperatorCommentsResultCard';
+import ReactMarkdown from "react-markdown";
 
 const DetailValue = ({ darkMode, label, value }) => (
     <div>
@@ -177,13 +178,25 @@ const InlineOperatorComments = ({ details, darkMode, onCommentGenerated }) => {
                                             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                                                 <span className="inline-flex items-center gap-1.5 rounded border border-sky-500/20 bg-sky-500/10 px-2 py-1 font-medium text-sky-500">
                                                     <FileText className="h-3.5 w-3.5" />
-                                                    {src.ref}
+                                                    {src.filename || 'n/a'}
                                                 </span>
                                             </div>
-                                            <p className={`mb-2 truncate text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>File: {src.filename}</p>
-                                            <p className={`whitespace-pre-wrap border-l-2 pl-3 text-xs leading-relaxed italic ${darkMode ? 'border-slate-600 text-slate-300' : 'border-slate-300 text-slate-700'}`}>
-                                                "{src.snippet}"
-                                            </p>
+                                            {/* <p className={`mb-2 truncate text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>File: {src.filename}</p> */}
+                                            <ReactMarkdown
+                                                components={{
+                                                    p: ({ children }) => (
+                                                        <p className="mb-2">{children}</p>
+                                                    ),
+                                                    h3: ({ children }) => (
+                                                        <h3 className="mb-2 mt-3 font-semibold">{children}</h3>
+                                                    ),
+                                                    strong: ({ children }) => (
+                                                        <strong className="font-semibold">{children}</strong>
+                                                    ),
+                                                }}
+                                            >
+                                                {src.snippet}
+                                            </ReactMarkdown>
                                         </div>
                                     ))}
                                 </div>
@@ -214,20 +227,20 @@ const InlineOperatorComments = ({ details, darkMode, onCommentGenerated }) => {
                         </div>
                     )}
 
-                    <label htmlFor={`operator-feedback-${details.id}`} className={`mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                    <label htmlFor={`operator-feedback-${details.id}`} className={`mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
                         Need changes? <span className="font-normal normal-case opacity-70">(Provide new feedback to regenerate)</span>
                     </label>
+                    <span className="text-sm text-slate-400">
+                        This is an optional section. If you have any specific comments on this observation, we can include that in the draft comments generated.
+                    </span>
                     <textarea
                         id={`operator-feedback-${details.id}`}
                         value={operatorFeedback}
                         onChange={(event) => setOperatorFeedback(event.target.value)}
                         rows={3}
-                        placeholder="Add context, correct the timeline, or provide specific instructions..."
+                        // placeholder="Add context, correct the timeline, or provide specific instructions..."
                         className={`w-full resize-none rounded-lg border px-4 py-3 text-sm outline-none transition focus:border-sky-500 focus:ring-1 focus:ring-sky-500 ${darkMode ? 'border-slate-600 bg-slate-900/80 text-slate-100 placeholder:text-slate-500' : 'border-slate-300 bg-white text-slate-900 placeholder:text-slate-400'}`}
                     />
-                    <span className="text-sm text-slate-500">
-                        This is an optional section. If you have any specific comments on this observation, we can include that in the draft comments generated.
-                    </span>
                     <div className="mt-3 flex justify-end">
                         <button
                             type="button"
@@ -271,12 +284,16 @@ const InlineOperatorComments = ({ details, darkMode, onCommentGenerated }) => {
                     <h4 className={`text-sm font-semibold ${darkMode ? 'text-sky-400' : 'text-sky-700'}`}>Draft Operator Comments</h4>
                 </div>
                 <div>
-                    <label htmlFor={`operator-feedback-${details.id}`} className={`text-xs font-semibold uppercase tracking-wide ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>Operator feedback <span className="font-normal opacity-70">(optional)</span></label>
-                    <textarea id={`operator-feedback-${details.id}`} value={operatorFeedback} onChange={(event) => setOperatorFeedback(event.target.value)} rows={3} placeholder="Your response to this observation..." className={`mt-2 w-full resize-none rounded-lg border px-4 py-3 text-sm outline-none transition focus:border-sky-500 focus:ring-1 focus:ring-sky-500 ${darkMode ? 'border-slate-600 bg-slate-900/80 text-slate-100 placeholder:text-slate-500' : 'border-slate-300 bg-white text-slate-900 placeholder:text-slate-400'}`} />
+                    <label htmlFor={`operator-feedback-${details.id}`} className={`text-xs font-semibold uppercase tracking-wide ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                        Operator feedback
+                        <span className="font-normal opacity-70">(optional)</span>
+                    </label><br />
+                    <span className="text-sm text-slate-400">
+                        This is an optional section. If you have any specific comments on this observation, we can include that in the draft comments generated.
+                    </span>
+
+                    <textarea id={`operator-feedback-${details.id}`} value={operatorFeedback} onChange={(event) => setOperatorFeedback(event.target.value)} rows={3} className={`mt-2 w-full resize-none rounded-lg border px-4 py-3 text-sm outline-none transition focus:border-sky-500 focus:ring-1 focus:ring-sky-500 ${darkMode ? 'border-slate-600 bg-slate-900/80 text-slate-100 placeholder:text-slate-500' : 'border-slate-300 bg-white text-slate-900 placeholder:text-slate-400'}`} />
                 </div>
-                <span className="text-sm text-slate-500">
-                    This is an optional section. If you have any specific comments on this observation, we can include that in the draft comments generated.
-                </span>
                 {errorMessage && <p className="text-sm text-rose-500">{errorMessage}</p>}
                 <div className="flex justify-end">
                     <button type="submit" disabled={isGenerating} className="inline-flex items-center gap-2 rounded-lg bg-sky-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-60"><Sparkles className="h-4 w-4" />Generate operator comments</button>

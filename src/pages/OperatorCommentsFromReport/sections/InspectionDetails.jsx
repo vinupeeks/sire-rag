@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useGetInspectionDetailsMutation } from '../../../redux/services/inspectionsApi';
 import { useFetchMutation } from '../../../redux/services/operatorCommentsApi';
 import { ROUTES } from '../../../constants/routes';
+import { BASEURL } from '../../../config/config';
 import OperatorCommentsResultCard from '../components/OperatorCommentsResultCard';
 import ReactMarkdown from "react-markdown";
 
@@ -59,6 +60,18 @@ const InlineOperatorComments = ({ details, darkMode, onCommentGenerated }) => {
     const isGenerating = isLoading || isRegenerating;
     const category = details.category ? details.category.charAt(0) + details.category.slice(1).toLowerCase() : '';
     const [isSourcesOpen, setIsSourcesOpen] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState(null);
+    const visibleSources = (comment?.sources || []).filter((source) => (
+        !source?.snippet?.trim().toLowerCase().startsWith('i cannot find')
+    ));
+
+    const getSourcePreviewUrl = (source) => {
+        const sourcePath = source?.source_details?.find((sourceDetail) => sourceDetail?.path)?.path;
+        if (!sourcePath) return null;
+
+        const normalizedPath = sourcePath.replace(/^[\\/]+/, '').replace(/\\/g, '/');
+        return `${BASEURL.replace(/\/$/, '')}/${normalizedPath}`;
+    };
 
     useEffect(() => {
         if (!isLoading) return undefined;
@@ -142,12 +155,12 @@ const InlineOperatorComments = ({ details, darkMode, onCommentGenerated }) => {
                     </div>
 
                     {/* Sources List */}
-                    {comment?.sources && comment?.sources.length > 0 && (
+                    {visibleSources.length > 0 && (
                         <div className={`rounded-xl border px-4 p-2 ${darkMode ? 'border-slate-700/60 bg-[#0f172a]' : 'border-slate-200 bg-slate-50'}`}>
                             <div className="flex items-center justify-between">
                                 <h3 className={`flex items-center gap-2 text-sm font-semibold tracking-wide ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
                                     <BookOpen className={`h-4 w-4 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`} />
-                                    Reference Sources ({comment.sources.length})
+                                    Reference Sources ({visibleSources.length})
                                 </h3>
                                 <button
                                     type="button"
@@ -173,13 +186,25 @@ const InlineOperatorComments = ({ details, darkMode, onCommentGenerated }) => {
 
                             {isSourcesOpen && (
                                 <div className="custom-scrollbar mt-3 max-h-[250px] space-y-3 overflow-y-auto border-t pr-2 pt-3 border-slate-200 dark:border-slate-700/60">
-                                    {comment?.sources.map((src, idx) => (
+                                    {visibleSources.map((src, idx) => (
                                         <div key={idx} className={`rounded-lg border p-3.5 text-sm transition-colors ${darkMode ? 'border-slate-700/50 bg-[#1a2233] hover:border-slate-600' : 'border-slate-200 bg-white hover:border-slate-300 shadow-sm'}`}>
                                             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                                                <span className="inline-flex items-center gap-1.5 rounded border border-sky-500/20 bg-sky-500/10 px-2 py-1 font-medium text-sky-500">
-                                                    <FileText className="h-3.5 w-3.5" />
-                                                    {src.filename || 'n/a'}
-                                                </span>
+                                                {getSourcePreviewUrl(src) ? (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setPreviewUrl(getSourcePreviewUrl(src))}
+                                                        title={`Open ${src.filename || 'source document'}`}
+                                                        className="inline-flex max-w-full items-center gap-1.5 rounded border border-sky-500/20 bg-sky-500/10 px-2 py-1 text-left font-medium text-sky-500 transition-colors hover:border-sky-400/50 hover:bg-sky-500/20"
+                                                    >
+                                                        <FileText className="h-3.5 w-3.5 shrink-0" />
+                                                        <span className="truncate">{src.filename || 'n/a'}</span>
+                                                    </button>
+                                                ) : (
+                                                    <span className="inline-flex max-w-full items-center gap-1.5 rounded border border-sky-500/20 bg-sky-500/10 px-2 py-1 font-medium text-sky-500">
+                                                        <FileText className="h-3.5 w-3.5 shrink-0" />
+                                                        <span className="truncate">{src.filename || 'n/a'}</span>
+                                                    </span>
+                                                )}
                                             </div>
                                             {/* <p className={`mb-2 truncate text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>File: {src.filename}</p> */}
                                             <ReactMarkdown
@@ -201,6 +226,31 @@ const InlineOperatorComments = ({ details, darkMode, onCommentGenerated }) => {
                                     ))}
                                 </div>
                             )}
+                        </div>
+                    )}
+
+                    {previewUrl && (
+                        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm sm:p-6 md:p-10">
+                            <div className={`relative flex h-full w-full max-w-5xl flex-col overflow-hidden rounded-2xl border shadow-2xl ${darkMode ? 'border-slate-700/80 bg-[#1e2533]' : 'border-slate-200 bg-white'}`}>
+                                <div className={`flex items-center justify-between border-b px-5 py-3.5 ${darkMode ? 'border-slate-700/60' : 'border-slate-100'}`}>
+                                    <span className={`flex items-center gap-2 text-sm font-semibold tracking-wide ${darkMode ? 'text-slate-100' : 'text-slate-800'}`}>
+                                        <FileText className="h-4 w-4 text-sky-500" />
+                                        Source Document Preview
+                                    </span>
+                                    <button
+                                        type="button"
+                                        onClick={() => setPreviewUrl(null)}
+                                        aria-label="Close source document preview"
+                                        title="Close preview"
+                                        className={`rounded-lg p-1.5 transition-colors ${darkMode ? 'text-slate-400 hover:bg-slate-800 hover:text-slate-200' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'}`}
+                                    >
+                                        <X className="h-5 w-5" />
+                                    </button>
+                                </div>
+                                <div className="relative flex-1 bg-neutral-900/5">
+                                    <iframe src={previewUrl} title="Source document viewer" className="h-full w-full border-0" />
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>
@@ -336,221 +386,6 @@ const OperatorCommentsModal = ({ details, darkMode, onClose }) => {
                 operator_feedback: operatorFeedback,
                 findings_id: details.id
             }).unwrap();
-            // const response = {
-            //     "success": true,
-            //     "message": "Operator comment analyzed and saved successfully.",
-            //     "data": {
-            //         "id": 18,
-            //         "user_id": 7,
-            //         "question_number": "10.4.2",
-            //         "category": "Hardware",
-            //         "response_type": "Observable or detectable deficiency",
-            //         "comment": "The last lube oil analysis for mooring winch 3 indicated a critical (red) status due to low viscosity. The laboratory requested the vessel to confirm the oil type on the label. The vessel had sent a new sample ashore for analysis.",
-            //         "status": "True",
-            //         "error_log": null,
-            //         "immediate_cause": "The most recent lube oil analysis for mooring winch 3 returned a critical (red) status for low viscosity, and the laboratory requested confirmation of the oil type recorded on the tank/container label. The vessel had already drawn and sent ashore a new sample for further analysis at the time of inspection.",
-            //         "root_cause": "The critical status has not yet been resolved because the laboratory's request to confirm the labelled oil type has not been closed out, leaving the possibility that an incorrect grade or type of oil is in use in mooring winch 3 unconfirmed. This is a verification gap in the vessel's response to an off-spec analysis result rather than a failure of the sampling programme itself, which had detected and flagged the anomaly as intended.",
-            //         "corrective_action": "The Chief Engineer will confirm the oil type and grade shown on the mooring winch 3 gearcase label against the company's approved lubricant list and will advise the laboratory accordingly to support their assessment of the low viscosity result. A new sample has been sent ashore for analysis, and the Technical Superintendent will review the outcome once the laboratory report is received before determining whether the oil requires changing over.",
-            //         "preventative_action": "The observation will be shared with the internal auditors for verification during the vessel's internal audit and inspections, with particular attention to the timeliness of follow-up action on critical (red) oil analysis results. The Technical Superintendent will verify closure of the mooring winch 3 oil analysis anomaly, including confirmation of oil type and any subsequent laboratory findings, during the next ship visit or superintendent review. Should the confirmed oil type or condition require a change of lubricant, this will be actioned and recorded through the planned maintenance system.",
-            //         "provider": "claude",
-            //         "question_bank_hit": true,
-            //         "confidence": 0.55,
-            //         "question_info": {
-            //             "title": "10.4.2. Did the vessel operator subscribe to a lube oil and hydraulic oil analysis program and was a procedure in place to act on the results and tr"
-            //         },
-            //         "assumptions": [
-            //             "That the mooring winch 3 gearcase carries a label identifying the oil type, allowing the Chief Engineer to check it against records.",
-            //             "That the change of lubricant, if required, has not yet occurred and remains contingent on laboratory confirmation.",
-            //             "That no interim restriction on winch use was applied; none is evidenced in the observation."
-            //         ],
-            //         "section_sources": [
-            //             {
-            //                 "section": "Immediate Cause",
-            //                 "source_refs": [
-            //                     "Q-Source 2"
-            //                 ],
-            //                 "basis": "Q-Source 2 defines critical/warning status follow-up as expected evidence, confirming the red status and lab query are the relevant facts."
-            //             },
-            //             {
-            //                 "section": "Root Cause",
-            //                 "source_refs": [
-            //                     "Rule-Source 7",
-            //                     "Q-Source 2"
-            //                 ],
-            //                 "basis": "Rule-Source 7 states off-spec oil consumption is not permitted until confirmed with the office, showing the confirmation step is the pending control."
-            //             },
-            //             {
-            //                 "section": "Corrective Action",
-            //                 "source_refs": [
-            //                     "Rule-Source 7",
-            //                     "Rule-Source 5"
-            //                 ],
-            //                 "basis": "Rule-Source 7 and 5 describe confirming oil type/grade and TS-led anomaly investigation as the required company steps following a critical result."
-            //             },
-            //             {
-            //                 "section": "Preventative Action",
-            //                 "source_refs": [
-            //                     "Rule-Source 5",
-            //                     "Rule-Source 8"
-            //                 ],
-            //                 "basis": "Rule-Source 5 and 8 assign TS oversight of grade verification and remedial action on a 3-monthly analysis cycle, grounding the verification loop."
-            //             }
-            //         ],
-            //         "sources": [
-            //             {
-            //                 "stage": 1,
-            //                 "ref": "Q-Source 1",
-            //                 "filename": "SMS knowledge base (unattributed)",
-            //                 "role": "company_ims",
-            //                 "role_label": "Operator's own IMS / SMS procedure",
-            //                 "supports": [
-            //                     "Root Cause",
-            //                     "Corrective Action",
-            //                     "Preventative Action"
-            //                 ],
-            //                 "score": 0.5,
-            //                 "all_sources": [],
-            //                 "snippet": "I cannot find this information in the documents.\n\n> **Context Summary:** Provided context covers SMM manuals, filing structure, and contingency references, but contains no SIRE 2.0 question 10.4.2 details.\n\n### Requirement Reference (Partial)\n* **SIRE 2.0 Q10.4.2 text** not present in context.\n* **Expected evidence criteria** not documented here.\n* **Hardware/human/process scope** unavailable in sources.\n\n### Available Related References\n* **Investigation evidence process** detailed in SMM Ch.8.\n* **PMS/critical equipment records** logged in Company ERP.\n* **Class/survey certificates** held as hardcopy + class website.\n\n### Source Indexes\n`SMM/01` | `COM` | `SIRE 2.0 (not present)`"
-            //             },
-            //             {
-            //                 "stage": 1,
-            //                 "ref": "Q-Source 2",
-            //                 "filename": "questions.xlsx",
-            //                 "role": "question_library",
-            //                 "role_label": "SIRE 2.0 question library",
-            //                 "supports": [
-            //                     "Immediate Cause",
-            //                     "Root Cause",
-            //                     "Preventative Action"
-            //                 ],
-            //                 "score": 1,
-            //                 "snippet": "QUESTION 10.4.2: Did the vessel operator subscribe to a lube oil and hydraulic oil analysis program and was a procedure in place to act on the results and trends identified by the analysis?\n\nSHORT TITLE: Lube oil and hydraulic oil analysis program\n\nROVIQ SEQUENCE: Chief Engineer's Office\n\nOBJECTIVE:\nTo ensure that the quality of lube oils and hydraulic oils is monitored, and action taken when necessary to avoid machinery damage.\n\nEXPECTED EVIDENCE:\n• The lubricating and hydraulic oil analysis programme information documenting the oils subject to analysis.\n• The lubricating and hydraulic oil analysis records for the previous two cycles of analysis.\n• Where analysis had resulted in a “critical” (red) or “warning” (amber) status, any follow up communications\nfrom shore-based management.\n• Maintenance records to demonstrate that the recommended or instructed actions had been taken to correct\nany “critical” or “warning” status.\n\nGROUNDS FOR NEGATIVE OBSERVATION:\n• The vessel did not have a programme for the routine sampling and analysis of lubricating and hydraulic oils.\n• The accompanying officer was unfamiliar with the company procedure for managing the lubricating and\nhydraulic oil a"
-            //             },
-            //             {
-            //                 "stage": 2,
-            //                 "ref": "Rule-Source 1",
-            //                 "filename": "SMS knowledge base (unattributed)",
-            //                 "role": "company_ims",
-            //                 "role_label": "Operator's own IMS / SMS procedure",
-            //                 "supports": [
-            //                     "Root Cause",
-            //                     "Corrective Action",
-            //                     "Preventative Action"
-            //                 ],
-            //                 "score": 0.5,
-            //                 "all_sources": [],
-            //                 "snippet": "I cannot find this information in the documents.\n\n> **Context Summary:** Context lists lube oil analysis filing and reference forms but lacks SIRE 2.0 Q10.4.2 text, scope, or expected evidence criteria.\n\n### Requirement Reference (Partial)\n* **SIRE 2.0 Q10.4.2 text** not present in context.\n* **Expected evidence criteria** not documented here.\n* **Hardware/human/process split** unavailable in sources.\n\n### Related Lube Oil Data (Context)\n* **LUB Oil Analysis reports** filed (File No 8).\n* **Lubricant report** referenced as TEC01.\n* **Lub Oil Chart** maintained onboard.\n* **Fuel/Lubs analysis** stored in Company ERP.\n\n### Source Indexes\n`SMM/02` | `COM/11` | `SIRE 2.0 (not present)`"
-            //             },
-            //             {
-            //                 "stage": 2,
-            //                 "ref": "Rule-Source 2",
-            //                 "filename": "SMS knowledge base (unattributed)",
-            //                 "role": "company_ims",
-            //                 "role_label": "Operator's own IMS / SMS procedure",
-            //                 "supports": [
-            //                     "Root Cause",
-            //                     "Corrective Action",
-            //                     "Preventative Action"
-            //                 ],
-            //                 "score": 0.5,
-            //                 "all_sources": [],
-            //                 "snippet": "I cannot find this information in the documents.\n\n> **Context Summary:** Context references lube oil analysis reporting forms and MARPOL records but lacks specific statutory rules on mooring winch lube oil critical viscosity status.\n\n### Search Findings\n* **No statutory rule** on winch lube viscosity found.\n* **Critical red status handling** not documented in context.\n* **Oil type label confirmation** procedure absent here.\n\n### Available Related References\n* **Lub Oil Analysis reports** filed (File No 8, TEC01).\n* **Lubricant report TEC01** logged with analysis records.\n* **Lubrication of Machinery** cited SMM 4.2.14.\n* **Oil sample documentation** retained onboard (SMM Ch.4).\n\n### Source Indexes\n`SMM/04` | `SMM/02` | `SOLAS / MARPOL (not present)`"
-            //             },
-            //             {
-            //                 "stage": 2,
-            //                 "ref": "Rule-Source 3",
-            //                 "filename": "SMS knowledge base (unattributed)",
-            //                 "role": "company_ims",
-            //                 "role_label": "Operator's own IMS / SMS procedure",
-            //                 "supports": [
-            //                     "Root Cause",
-            //                     "Corrective Action",
-            //                     "Preventative Action"
-            //                 ],
-            //                 "score": 0.5,
-            //                 "all_sources": [],
-            //                 "snippet": "I cannot find this information in the documents.\n\n> **Context Summary:** Context details company lube oil sampling and analysis procedures but lacks specific OCIMF/ISGOTT guidance on mooring winch critical viscosity status.\n\n### Search Findings\n* **No OCIMF/ISGOTT text** on winch lube viscosity found.\n* **Critical status recommended practice** absent from context.\n* **Label/type confirmation guidance** not in industry sources here.\n\n### Related Company Procedure (Context)\n* **Quarterly LO sampling** required for all machinery in use.\n* **Designated laboratory** specified by Company.\n* **Sampling per lab instructions** using provided sample bottles.\n* **Landing report TEC/36** filled for landed samples.\n* **Analysis reports** electronically transmitted to ship.\n* **LO Analysis reports filed** under File No 8 (TEC01).\n\n### Source Indexes\n`ISGOTT` | `OCIMF (not present)` | `SMM/04`"
-            //             },
-            //             {
-            //                 "stage": 2,
-            //                 "ref": "Rule-Source 4",
-            //                 "filename": "SMS knowledge base (unattributed)",
-            //                 "role": "company_ims",
-            //                 "role_label": "Operator's own IMS / SMS procedure",
-            //                 "supports": [
-            //                     "Root Cause",
-            //                     "Corrective Action",
-            //                     "Preventative Action"
-            //                 ],
-            //                 "score": 0.5,
-            //                 "all_sources": [],
-            //                 "snippet": "I cannot find this information in the documents.\n\n> **Context Summary:** Context covers lube oil analysis filing and inventory management, but contains no TMSA KPI or best practice element mapping for mooring winch lube status.\n\n### Search Findings\n* **No TMSA KPI content** located in context.\n* **Best practice element** not defined here.\n* **Mooring winch lube analysis** unmatched to element.\n\n### Available Related References\n* **Lub Oil analysis filed** in ERP (Document Management).\n* **Fuel/Lub/Boiler Water** records under vessel documents.\n* **PMS/critical equipment** running hours in ERP (PMS).\n\n### Source Indexes\n`COM/11` | `TMSA (not present)`"
-            //             },
-            //             {
-            //                 "stage": 2,
-            //                 "ref": "Rule-Source 5",
-            //                 "filename": "SMS knowledge base (unattributed)",
-            //                 "role": "company_ims",
-            //                 "role_label": "Operator's own IMS / SMS procedure",
-            //                 "supports": [
-            //                     "Root Cause",
-            //                     "Corrective Action",
-            //                     "Preventative Action"
-            //                 ],
-            //                 "score": 0.5,
-            //                 "all_sources": [],
-            //                 "snippet": "> **Context Summary:** Company procedures define Chief Engineer and Technical Superintendent responsibilities for lube oil sampling, analysis, and anomaly investigation.\n\n### Sampling & Analysis Procedure\n* **Quarterly LO sampling** of all machinery in use.\n* **Designated laboratory** specified by Company.\n* **C/E ensures sampling** per lab instructions, provided bottles.\n* **Transport via couriers** landed with agents' instructions.\n* **Landing report TEC/36** completed for landed samples.\n* **Reports transmitted electronically** to the ship.\n\n### Responsibilities & Anomaly Action\n* **TS verifies correct grades** of oils used on vessels.\n* **TS investigates anomalies** in routine analysis reports.\n* **Particle analysis attention** flags abnormal wear/malfunction.\n* **Analysis at 3-monthly intervals** monitored by TS.\n* **Remedial action taken** as necessary by TS.\n\n### Recording & Filing\n* **LO Analysis reports filed** (File No 8, TEC01).\n* **Fuel/Lub analysis stored** in Company ERP.\n* **Lub Oil Chart maintained** onboard and in office.\n\n### Source Indexes\n`SMM/04` | `COM/04` | `COM/11`"
-            //             },
-            //             {
-            //                 "stage": 2,
-            //                 "ref": "Rule-Source 6",
-            //                 "filename": "SMS knowledge base (unattributed)",
-            //                 "role": "company_ims",
-            //                 "role_label": "Operator's own IMS / SMS procedure",
-            //                 "supports": [
-            //                     "Root Cause",
-            //                     "Corrective Action",
-            //                     "Preventative Action"
-            //                 ],
-            //                 "score": 0.5,
-            //                 "all_sources": [],
-            //                 "snippet": "> **Context Summary:** Company incident investigation defines a three-tier cause hierarchy applicable to hardware failures, with structured corrective/preventive action.\n\n### Cause Hierarchy (Hardware Focus)\n* **Immediate/Direct Cause** Use of defective machinery.\n* **Direct cause examples** Failure to follow rules, poor housekeeping.\n* **Basic/Underlying Cause** Inadequate maintenance or worn equipment.\n* **Management Control Failure** Inadequate PMS or procedures.\n* **Ask WHY repeatedly** Reach root/basic cause.\n\n### Machinery Failure Investigation\n* **Check maintenance period** for the machine.\n* **Confirm last overhaul** and verify record exists.\n* **Collect machinery manuals** and engineering drawings.\n* **Review PMS schedules** and maintenance records.\n* **Check warning signs** on failed machinery.\n* **Assess fatigue** as contributing factor.\n\n### Corrective / Preventive Action\n* **Determine action** identifying true root cause.\n* **Investigate all incidents** including near misses.\n* **Circulate Fleet alerts** tracked until implemented.\n* **Report includes timescale** for close-out.\n* **Recommend recurrence prevention** measures.\n\n### Source Indexes\n`SMM/01 Ch.8` | `Section "
-            //             },
-            //             {
-            //                 "stage": 2,
-            //                 "ref": "Rule-Source 7",
-            //                 "filename": "SMS knowledge base (unattributed)",
-            //                 "role": "company_ims",
-            //                 "role_label": "Operator's own IMS / SMS procedure",
-            //                 "supports": [
-            //                     "Root Cause",
-            //                     "Corrective Action",
-            //                     "Preventative Action"
-            //                 ],
-            //                 "score": 0.5,
-            //                 "all_sources": [],
-            //                 "snippet": "> **Context Summary:** Company procedures define lube oil sampling, off-spec handling, and corrective steps applicable to critical analysis results.\n\n### Immediate Correction Steps\n* **Confirm oil type** on tank/label as lab requested.\n* **Redraw fresh sample** per lab instructions, correct bottles.\n* **Send sample ashore** via courier with agent instructions.\n* **Complete landing report** TEC/36 for landed samples.\n\n### Off-Spec / Critical Handling\n* **Consumption not permitted** if analysis indicates off-spec.\n* **Change over fluid** only after confirming with office.\n* **Isolate affected system** to prevent contamination.\n* **Maintain detailed records** of movement and machinery issues.\n\n### Verification & Follow-up\n* **Investigate anomalies** flagged in routine analysis (TS duty).\n* **Take remedial action** per particle/wear trend analysis.\n* **Transmit corrected report** electronically back to ship.\n\n### Source Indexes\n`SMM/04` | `COM/04` | `TEC/36`"
-            //             },
-            //             {
-            //                 "stage": 2,
-            //                 "ref": "Rule-Source 8",
-            //                 "filename": "SMS knowledge base (unattributed)",
-            //                 "role": "company_ims",
-            //                 "role_label": "Operator's own IMS / SMS procedure",
-            //                 "supports": [
-            //                     "Root Cause",
-            //                     "Corrective Action",
-            //                     "Preventative Action"
-            //                 ],
-            //                 "score": 0.5,
-            //                 "all_sources": [],
-            //                 "snippet": "> **Context Summary:** Company procedures define quarterly lube oil sampling, laboratory analysis, and PMS-based verification for machinery in use.\n\n### PMS & Sampling Task\n* **Quarterly LO sampling** for all machinery in use.\n* **Sample per lab instructions** using provided bottles.\n* **Draw samples correctly** into laboratory sample bottles.\n* **Transport via courier** landed with clear forwarding instructions.\n* **Landing report TEC/36** completed for landed samples.\n\n### Analysis Verification & Follow-up\n* **Analysis reports transmitted** electronically to ship.\n* **Investigate anomalies** indicated in routine analysis reports.\n* **Particle analysis attention** trends indicate abnormal wear.\n* **3-monthly interval** analysis monitored by TS.\n* **Remedial action taken** for any indicated abnormality.\n\n### Records & Filing\n* **LO Analysis reports filed** File No 8 (TEC01).\n* **Lub Oil chart maintained** onboard and in office.\n* **Correct grade verification** TS confirms grades used.\n\n### Source Indexes\n`SMM/04` | `COM/04` | `SMM/02`"
-            //             }
-            //         ],
-            //         "updatedAt": "2026-09-07T07:35:50.392Z",
-            //         "createdAt": "2026-09-07T07:35:50.392Z"
-            //     }
-            // }
             setApiResponse(response.data);
         } catch (error) {
             setErrorMessage(error?.data?.message || 'Failed to generate operator comments. Please try again.');

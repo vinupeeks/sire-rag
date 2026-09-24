@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
-import { AlertCircle, ArrowLeft, BookOpen, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardList, Eye, FileText, Loader2, RefreshCw } from 'lucide-react';
+import { AlertCircle, ArrowLeft, BookOpen, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardList, Eye, FileText, Loader2, RefreshCw, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useGetInspectionDetailsMutation } from '../../../redux/services/inspectionsApi';
 import { ROUTES } from '../../../constants/routes';
+import { BASEURL } from '../../../config/config';
 import OperatorCommentsResultCard from '../components/OperatorCommentsResultCard';
 import ReactMarkdown from 'react-markdown';
 
@@ -34,10 +35,22 @@ const ArchivedInspectionItem = ({ details, darkMode }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [selectedCommentIndex, setSelectedCommentIndex] = useState(0);
     const [isSourcesOpen, setIsSourcesOpen] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState(null);
     const observation = details.observation;
     const question = observation?.inspection_question?.question;
     const existingComments = Array.isArray(details.comments) ? details.comments : [];
     const comment = existingComments[selectedCommentIndex];
+    const visibleSources = (comment?.sources || []).filter((source) => (
+        !source?.snippet?.trim().toLowerCase().startsWith('i cannot find')
+    ));
+
+    const getSourcePreviewUrl = (source) => {
+        const sourcePath = source?.source_details?.find((sourceDetail) => sourceDetail?.path)?.path;
+        if (!sourcePath) return null;
+
+        const normalizedPath = sourcePath.replace(/^[\\/]+/, '').replace(/\\/g, '/');
+        return `${BASEURL.replace(/\/$/, '')}/${normalizedPath}`;
+    };
 
     const showPreviousComment = () => setSelectedCommentIndex((current) => Math.max(0, current - 1));
     const showNextComment = () => setSelectedCommentIndex((current) => Math.min(existingComments.length - 1, current + 1));
@@ -128,12 +141,12 @@ const ArchivedInspectionItem = ({ details, darkMode }) => {
                                 <OperatorCommentsResultCard darkMode={darkMode} title="Preventative Action" resultKey="preventativeAction" content={comment.preventativeAction || comment.preventative_action} />
                             </div>
 
-                            {comment.sources?.length > 0 && (
-                                <div className={`mt-4 rounded-xl border p-3 ${darkMode ? 'border-slate-700/60 bg-[#0f172a]' : 'border-slate-200 bg-slate-50'}`}>
+                            {visibleSources.length > 0 && (
+                                <div className={`mt-4 rounded-xl border px-4 p-2 ${darkMode ? 'border-slate-700/60 bg-[#0f172a]' : 'border-slate-200 bg-slate-50'}`}>
                                     <div className="flex items-center justify-between gap-3">
                                         <h3 className={`flex items-center gap-2 text-sm font-semibold ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
                                             <BookOpen className="h-4 w-4" />
-                                            Reference Sources ({comment.sources.length})
+                                            Reference Sources ({visibleSources.length})
                                         </h3>
                                         <button type="button" onClick={() => setIsSourcesOpen((current) => !current)} aria-label={isSourcesOpen ? 'Hide sources' : 'View sources'} title={isSourcesOpen ? 'Hide sources' : 'View sources'} className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium ${darkMode ? 'border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-100'}`}>
                                             <Eye className="h-4 w-4" />
@@ -142,11 +155,25 @@ const ArchivedInspectionItem = ({ details, darkMode }) => {
                                     </div>
                                     {isSourcesOpen && (
                                         <div className={`mt-3 space-y-3 border-t pt-3 ${darkMode ? 'border-slate-700/60' : 'border-slate-200'}`}>
-                                            {comment.sources.map((source, index) => (
-                                                <div key={source.filename || source.ref || index} className={`rounded-lg border p-3 ${darkMode ? 'border-slate-700/50 bg-[#1a2233]' : 'border-slate-200 bg-white'}`}>
-                                                    <div className="mb-2 flex items-center gap-2">
-                                                        <FileText className="h-3.5 w-3.5 text-sky-500" />
-                                                        <span className="text-xs font-semibold text-sky-500">{source.filename || source.ref || `Source ${index + 1}`}</span>
+                                            {visibleSources.map((source, index) => (
+                                                <div key={source.filename || source.ref || index} className={`rounded-lg border p-3.5 text-sm transition-colors ${darkMode ? 'border-slate-700/50 bg-[#1a2233] hover:border-slate-600' : 'border-slate-200 bg-white hover:border-slate-300 shadow-sm'}`}>
+                                                    <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                                                        {getSourcePreviewUrl(source) ? (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setPreviewUrl(getSourcePreviewUrl(source))}
+                                                                title={`Open ${source.filename || 'source document'}`}
+                                                                className="inline-flex max-w-full items-center gap-1.5 rounded border border-sky-500/20 bg-sky-500/10 px-2 py-1 text-left font-medium text-sky-500 transition-colors hover:border-sky-400/50 hover:bg-sky-500/20"
+                                                            >
+                                                                <FileText className="h-3.5 w-3.5 shrink-0" />
+                                                                <span className="truncate">{source.filename || source.ref || `Source ${index + 1}`}</span>
+                                                            </button>
+                                                        ) : (
+                                                            <span className="inline-flex max-w-full items-center gap-1.5 rounded border border-sky-500/20 bg-sky-500/10 px-2 py-1 font-medium text-sky-500">
+                                                                <FileText className="h-3.5 w-3.5 shrink-0" />
+                                                                <span className="truncate">{source.filename || source.ref || `Source ${index + 1}`}</span>
+                                                            </span>
+                                                        )}
                                                     </div>
                                                     <ReactMarkdown
                                                         components={{
@@ -167,6 +194,31 @@ const ArchivedInspectionItem = ({ details, darkMode }) => {
                                             ))}
                                         </div>
                                     )}
+                                </div>
+                            )}
+
+                            {previewUrl && (
+                                <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm sm:p-6 md:p-10">
+                                    <div className={`relative flex h-full w-full max-w-5xl flex-col overflow-hidden rounded-2xl border shadow-2xl ${darkMode ? 'border-slate-700/80 bg-[#1e2533]' : 'border-slate-200 bg-white'}`}>
+                                        <div className={`flex items-center justify-between border-b px-5 py-3.5 ${darkMode ? 'border-slate-700/60' : 'border-slate-100'}`}>
+                                            <span className={`flex items-center gap-2 text-sm font-semibold tracking-wide ${darkMode ? 'text-slate-100' : 'text-slate-800'}`}>
+                                                <FileText className="h-4 w-4 text-sky-500" />
+                                                Source Document Preview
+                                            </span>
+                                            <button
+                                                type="button"
+                                                onClick={() => setPreviewUrl(null)}
+                                                aria-label="Close source document preview"
+                                                title="Close preview"
+                                                className={`rounded-lg p-1.5 transition-colors ${darkMode ? 'text-slate-400 hover:bg-slate-800 hover:text-slate-200' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'}`}
+                                            >
+                                                <X className="h-5 w-5" />
+                                            </button>
+                                        </div>
+                                        <div className="relative flex-1 bg-neutral-900/5">
+                                            <iframe src={previewUrl} title="Source document viewer" className="h-full w-full border-0" />
+                                        </div>
+                                    </div>
                                 </div>
                             )}
                         </div>

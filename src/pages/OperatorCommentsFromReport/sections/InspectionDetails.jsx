@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AlertCircle, ArrowLeft, ClipboardList, Loader2, RefreshCw, ChevronDown, ChevronUp, Sparkles, X, ChevronLeft, ChevronRight, FileText, BookOpen, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { useGetInspectionDetailsMutation } from '../../../redux/services/inspectionsApi';
+import { useGetAllFilesQuery } from '../../../redux/services/smsApi';
 import { useFetchMutation } from '../../../redux/services/operatorCommentsApi';
 import { ROUTES } from '../../../constants/routes';
 import { BASEURL } from '../../../config/config';
@@ -43,7 +45,32 @@ const ANALYSIS_LOADING_MESSAGES = [
     'Finalizing analysis (Estimated: 1–2 minutes)...',
 ];
 
-const InlineOperatorComments = ({ details, darkMode, onCommentGenerated }) => {
+const normalizeFilePath = (filePath) => String(filePath || '')
+    .replace(/^[\\/]+/, '')
+    .replace(/\\/g, '/')
+    .toLowerCase();
+
+const isEnabledFileFlag = (value) => value === true || value === 1 || value === '1' || value === 'true';
+
+const getSourceFileType = (source, files) => {
+    const sourcePath = source?.source_details?.find((sourceDetail) => sourceDetail?.path)?.path;
+    const normalizedSourcePath = normalizeFilePath(sourcePath);
+    const matchedFile = files.find((file) => {
+        const normalizedFilePath = normalizeFilePath(file?.file_path);
+        return normalizedFilePath && (
+            normalizedFilePath === normalizedSourcePath
+            || normalizedSourcePath.endsWith(`/${normalizedFilePath}`)
+        );
+    });
+
+    if (!matchedFile) return null;
+
+    return isEnabledFileFlag(matchedFile.common) || isEnabledFileFlag(matchedFile.ocimf)
+        ? 'Common file'
+        : 'Company file';
+};
+
+const InlineOperatorComments = ({ details, darkMode, files = [], onCommentGenerated }) => {
     const [submitComment, { isLoading }] = useFetchMutation();
     const [isRegenerating, setIsRegenerating] = useState(false);
     const [operatorFeedback, setOperatorFeedback] = useState('');
@@ -188,6 +215,10 @@ const InlineOperatorComments = ({ details, darkMode, onCommentGenerated }) => {
                                 <div className="custom-scrollbar mt-3 max-h-[250px] space-y-3 overflow-y-auto border-t pr-2 pt-3 border-slate-200 dark:border-slate-700/60">
                                     {visibleSources.map((src, idx) => (
                                         <div key={idx} className={`rounded-lg border p-3.5 text-sm transition-colors ${darkMode ? 'border-slate-700/50 bg-[#1a2233] hover:border-slate-600' : 'border-slate-200 bg-white hover:border-slate-300 shadow-sm'}`}>
+                                            {(() => {
+                                                const sourceType = getSourceFileType(src, files);
+
+                                                return (
                                             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                                                 {getSourcePreviewUrl(src) ? (
                                                     <button
@@ -198,14 +229,24 @@ const InlineOperatorComments = ({ details, darkMode, onCommentGenerated }) => {
                                                     >
                                                         <FileText className="h-3.5 w-3.5 shrink-0" />
                                                         <span className="truncate">{src.filename || 'n/a'}</span>
+                                                        {sourceType && <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${sourceType === 'Common file'
+                                                            ? (darkMode ? 'bg-emerald-400/20 text-emerald-300' : 'bg-emerald-100 text-emerald-700')
+                                                            : (darkMode ? 'bg-amber-400/20 text-amber-300' : 'bg-amber-100 text-amber-700')
+                                                            }`}>{sourceType}</span>}
                                                     </button>
                                                 ) : (
                                                     <span className="inline-flex max-w-full items-center gap-1.5 rounded border border-sky-500/20 bg-sky-500/10 px-2 py-1 font-medium text-sky-500">
                                                         <FileText className="h-3.5 w-3.5 shrink-0" />
                                                         <span className="truncate">{src.filename || 'n/a'}</span>
+                                                        {sourceType && <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${sourceType === 'Common file'
+                                                            ? (darkMode ? 'bg-emerald-400/20 text-emerald-300' : 'bg-emerald-100 text-emerald-700')
+                                                            : (darkMode ? 'bg-amber-400/20 text-amber-300' : 'bg-amber-100 text-amber-700')
+                                                            }`}>{sourceType}</span>}
                                                     </span>
                                                 )}
                                             </div>
+                                                );
+                                            })()}
                                             {/* <p className={`mb-2 truncate text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>File: {src.filename}</p> */}
                                             <ReactMarkdown
                                                 components={{
@@ -498,7 +539,7 @@ const OperatorCommentsModal = ({ details, darkMode, onClose }) => {
     );
 };
 
-const InspectionAccordionItem = ({ details, darkMode, latestGeneratedComment, onCommentGenerated }) => {
+const InspectionAccordionItem = ({ details, darkMode, files, latestGeneratedComment, onCommentGenerated }) => {
     const [isOpen, setIsOpen] = useState(false);
 
     const observation = details.observation;
@@ -586,7 +627,12 @@ const InspectionAccordionItem = ({ details, darkMode, latestGeneratedComment, on
                                 </div>
                             )}
                         </div>
-                        <InlineOperatorComments details={details} darkMode={darkMode} onCommentGenerated={onCommentGenerated} />
+                        <InlineOperatorComments
+                            details={details}
+                            darkMode={darkMode}
+                            files={files || []}
+                            onCommentGenerated={onCommentGenerated}
+                        />
                     </div>
                 </div>
             )}
@@ -596,7 +642,10 @@ const InspectionAccordionItem = ({ details, darkMode, latestGeneratedComment, on
 
 const InspectionDetails = ({ darkMode, inspectionId }) => {
     const navigate = useNavigate();
+    const user = useSelector((state) => state.auth.user);
     const [getDetails, { data: response, isLoading, isError }] = useGetInspectionDetailsMutation();
+    const { data: allfiles } = useGetAllFilesQuery(user?.id, { skip: !user?.id });
+    
     const [latestGeneratedComments, setLatestGeneratedComments] = useState({});
     const loadDetails = useCallback(async () => {
         const result = await getDetails(inspectionId);
@@ -695,6 +744,7 @@ const InspectionDetails = ({ darkMode, inspectionId }) => {
                                     key={details.id}
                                     details={details}
                                     darkMode={darkMode}
+                                    files={allfiles?.data?.rows || []}
                                     latestGeneratedComment={latestGeneratedComments[details.id]}
                                     onCommentGenerated={(comment) => handleCommentGenerated(details.id, comment)}
                                 />

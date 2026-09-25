@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AlertCircle, ArrowLeft, BookOpen, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardList, Eye, FileText, Loader2, RefreshCw, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { useGetInspectionDetailsMutation } from '../../../redux/services/inspectionsApi';
+import { useGetAllFilesQuery } from '../../../redux/services/smsApi';
 import { ROUTES } from '../../../constants/routes';
 import { BASEURL } from '../../../config/config';
 import OperatorCommentsResultCard from '../components/OperatorCommentsResultCard';
@@ -15,6 +17,40 @@ const formatDate = (value) => {
         month: 'short',
         year: 'numeric',
     }).format(new Date(`${value}T00:00:00`));
+};
+
+const normalizeFilePath = (filePath) => String(filePath || '')
+    .replace(/^[\\/]+/, '')
+    .replace(/\\/g, '/')
+    .toLowerCase();
+
+const isEnabledFileFlag = (value) => value === true || value === 1 || value === '1' || value === 'true';
+
+const SourceTypeBadge = ({ darkMode, source, files }) => {
+    const sourcePath = source?.source_details?.find((sourceDetail) => sourceDetail?.path)?.path;
+    const normalizedSourcePath = normalizeFilePath(sourcePath);
+    const matchedFile = files.find((file) => {
+        const normalizedFilePath = normalizeFilePath(file?.file_path);
+        return normalizedFilePath && (
+            normalizedFilePath === normalizedSourcePath
+            || normalizedSourcePath.endsWith(`/${normalizedFilePath}`)
+        );
+    });
+
+    if (!matchedFile) return null;
+
+    const sourceType = isEnabledFileFlag(matchedFile.common) || isEnabledFileFlag(matchedFile.ocimf)
+        ? 'Common file'
+        : 'Company file';
+
+    return (
+        <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${sourceType === 'Common file'
+            ? (darkMode ? 'bg-emerald-400/20 text-emerald-300' : 'bg-emerald-100 text-emerald-700')
+            : (darkMode ? 'bg-amber-400/20 text-amber-300' : 'bg-amber-100 text-amber-700')
+            }`}>
+            {sourceType}
+        </span>
+    );
 };
 
 const MetadataBadge = ({ darkMode, value, accent = 'slate' }) => {
@@ -31,7 +67,7 @@ const MetadataBadge = ({ darkMode, value, accent = 'slate' }) => {
     );
 };
 
-const ArchivedInspectionItem = ({ details, darkMode }) => {
+const ArchivedInspectionItem = ({ details, darkMode, files = [] }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [selectedCommentIndex, setSelectedCommentIndex] = useState(0);
     const [isSourcesOpen, setIsSourcesOpen] = useState(false);
@@ -167,11 +203,13 @@ const ArchivedInspectionItem = ({ details, darkMode }) => {
                                                             >
                                                                 <FileText className="h-3.5 w-3.5 shrink-0" />
                                                                 <span className="truncate">{source.filename || source.ref || `Source ${index + 1}`}</span>
+                                                                <SourceTypeBadge darkMode={darkMode} source={source} files={files} />
                                                             </button>
                                                         ) : (
                                                             <span className="inline-flex max-w-full items-center gap-1.5 rounded border border-sky-500/20 bg-sky-500/10 px-2 py-1 font-medium text-sky-500">
                                                                 <FileText className="h-3.5 w-3.5 shrink-0" />
                                                                 <span className="truncate">{source.filename || source.ref || `Source ${index + 1}`}</span>
+                                                                <SourceTypeBadge darkMode={darkMode} source={source} files={files} />
                                                             </span>
                                                         )}
                                                     </div>
@@ -233,7 +271,9 @@ const ArchivedInspectionItem = ({ details, darkMode }) => {
 
 const ArchivedInspectionDetails = ({ darkMode, inspectionId }) => {
     const navigate = useNavigate();
+    const user = useSelector((state) => state.auth.user);
     const [getDetails, { data: response, isLoading, isError }] = useGetInspectionDetailsMutation();
+    const { data: allfiles } = useGetAllFilesQuery(user?.id, { skip: !user?.id });
 
     const loadDetails = useCallback(() => getDetails(inspectionId), [getDetails, inspectionId]);
 
@@ -272,7 +312,7 @@ const ArchivedInspectionDetails = ({ darkMode, inspectionId }) => {
                 <div className="p-6">
                     {isLoading && <div className={`flex min-h-48 flex-col items-center justify-center gap-3 ${mutedTextClass}`}><Loader2 className="h-7 w-7 animate-spin text-sky-500" /><p className="text-sm">Loading archived inspection details...</p></div>}
                     {!isLoading && isError && <div className={`flex min-h-48 flex-col items-center justify-center gap-3 rounded-xl border border-dashed ${darkMode ? 'border-rose-400/30 text-rose-300' : 'border-rose-200 text-rose-600'}`}><AlertCircle className="h-7 w-7" /><p className="text-sm">Unable to load archived inspection details.</p><button type="button" onClick={loadDetails} className="inline-flex items-center gap-2 rounded-lg bg-sky-500 px-3 py-2 text-sm font-semibold text-white hover:bg-sky-400"><RefreshCw className="h-4 w-4" />Try again</button></div>}
-                    {!isLoading && !isError && detailItems.length > 0 && <div className="space-y-4">{detailItems.map((details) => <ArchivedInspectionItem key={details.id} details={details} darkMode={darkMode} />)}</div>}
+                    {!isLoading && !isError && detailItems.length > 0 && <div className="space-y-4">{detailItems.map((details) => <ArchivedInspectionItem key={details.id} details={details} darkMode={darkMode} files={allfiles?.data?.rows || []} />)}</div>}
                     {!isLoading && !isError && detailItems.length === 0 && <div className={`flex min-h-48 items-center justify-center text-sm ${mutedTextClass}`}>No details found for this inspection.</div>}
                 </div>
             </div>

@@ -27,6 +27,16 @@ export const smsApi = createApi({
             }),
         }),
 
+        getAllFiles: builder.query({
+            query: (userId) => ({
+                url: `/api/rag/all-files`,
+                method: 'GET',
+                params: {
+                    user_id: Number(userId),
+                },
+            }),
+        }),
+
         uploadPdf: builder.mutation({
             query: (formData) => ({
                 url: `/api/rag/upload-document`,
@@ -73,6 +83,7 @@ export const smsApi = createApi({
 export const {
     useGetPdfListQuery,
     useGetOcimfFilesQuery,
+    useGetAllFilesQuery,
     useUploadPdfMutation,
     useDeletePdfMutation,
     useDeleteOcimfFileMutation,

@@ -1,17 +1,12 @@
-import React, { useState } from 'react';
-import {
-    Clipboard,
-    Clock,
-    CheckSquare,
-    MessageSquare as MessageIcon,
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import LayoutShell from '../../components/layout/LayoutShell';
 import Sidebar from '../../components/layout/Sidebar';
 import ToolTabs from '../../components/layout/ToolTabs';
 import ConfirmationModal from '../../common/ConfirmationModal';
 import { logout } from '../../redux/reducers/authReducers';
+import { ROUTES } from '../../constants/routes';
 import History from './sections/History';
 import InspectionComments from './sections/InspectionComments';
 
@@ -19,10 +14,11 @@ const OperatorCommentsPage = () => {
     const user = useSelector((state) => state.auth.user);
     const darkMode = useSelector((state) => state.data.darkMode);
     const navigate = useNavigate();
+    const location = useLocation();
     const dispatch = useDispatch();
 
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-    const [activeMenuItemId, setActiveMenuItemId] = useState('inspection-comments');
+    const isSubmittedRoute = location.pathname === ROUTES.OPERATOR_COMMENTS_SUBMITTED;
     const [confirmConfig, setConfirmConfig] = useState({
         isOpen: false,
         title: '',
@@ -43,33 +39,10 @@ const OperatorCommentsPage = () => {
         });
     };
 
-    // Operator Comments sidebar menu items
-    const operatorCommentsSidebarMenuItems = [
-        {
-            id: 'history',
-            label: 'History',
-            icon: MessageIcon,
-            isActive: activeMenuItemId === 'history',
-        },
-    ];
-
-    const handleOperatorCommentsMenuClick = (menuItemId) => {
-        setActiveMenuItemId(menuItemId);
-    };
-
-    const handleNewComment = () => {
-        setActiveMenuItemId('inspection-comments');
-    };
-
     const renderSection = () => {
-        switch (activeMenuItemId) {
-            case 'inspection-comments':
-                return <InspectionComments darkMode={darkMode} />;
-            case 'history':
-                return <History darkMode={darkMode} />;
-            default:
-                return <InspectionComments darkMode={darkMode} />;
-        }
+        return isSubmittedRoute
+            ? <History darkMode={darkMode} />
+            : <InspectionComments darkMode={darkMode} />;
     };
 
     // Main content area
@@ -89,14 +62,12 @@ const OperatorCommentsPage = () => {
                         collapsed={sidebarCollapsed}
                         activeConversationId=""
                         conversations={[]}
-                        onNewConversation={handleNewComment}
+                        onNewConversation={() => { }}
                         onSelectConversation={() => { }}
                         logoutFn={logoutFn}
                         user={user}
                         onToggle={() => setSidebarCollapsed((prev) => !prev)}
-                        menuItems={operatorCommentsSidebarMenuItems}
-                        actionButtonLabel="New comment"
-                        onMenuItemClick={handleOperatorCommentsMenuClick}
+                        showActionButton={false}
                         showConversations={false}
                         sidebarTitle="Operator Comments"
                         sidebarSubtitle="Assistant"

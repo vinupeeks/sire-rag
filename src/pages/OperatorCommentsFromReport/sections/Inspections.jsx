@@ -51,29 +51,23 @@ const Inspections = ({ darkMode }) => {
     }, [loadInspections]);
 
     const inspections = response?.data?.items || [];
-    const panelClass = darkMode ? 'border-slate-700/60 bg-[#1a2233]' : 'border-slate-200 bg-white';
     const mutedTextClass = darkMode ? 'text-slate-400' : 'text-slate-500';
 
     return (
         <>
-            <section className={`flex-1 overflow-auto p-6 ${darkMode ? 'bg-[#111827]' : 'bg-slate-100'}`}>
-                <div className={`mx-auto rounded-2xl border ${panelClass}`}>
-                <div className={`flex items-center justify-between border-b px-6 py-5 ${darkMode ? 'border-slate-700/60' : 'border-slate-200'}`}>
-                    <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/10 text-sky-500">
-                            <ClipboardList className="h-5 w-5" />
-                        </div>
-                        <div>
-                            <h1 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>Inspections</h1>
-                            <p className={`mt-1 text-sm ${mutedTextClass}`}>Select an inspection to create operator comments from its report.</p>
-                        </div>
+            <section className={`flex-1 overflow-auto px-7 py-6 ${darkMode ? 'bg-[#0b1523]' : 'bg-slate-100'}`}>
+                <div className="mx-auto flex max-w-[1500px] flex-col gap-5">
+                <div className="flex items-start justify-between gap-5">
+                    <div>
+                        <h1 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>Inspections</h1>
+                        <p className={`mt-1 text-[13px] ${mutedTextClass}`}>Pick an inspection to write operator comments on its findings.</p>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                         <button
                             type="button"
                             onClick={() => navigate(ROUTES.OPERATOR_COMMENTS_FROM_REPORT_UPLOAD)}
-                            className="inline-flex items-center gap-2 rounded-lg bg-sky-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-sky-600"
+                            className="inline-flex h-11 items-center gap-2 rounded-lg bg-[#0f6fb8] px-4 text-sm font-medium text-white transition-colors hover:bg-[#0c5f9f]"
                         >
                             <Upload className="h-4 w-4" />
                             Upload SIRE 2.0 report
@@ -92,7 +86,23 @@ const Inspections = ({ darkMode }) => {
                     </div>
                 </div>
 
-                <div className="p-6">
+                <div className={`grid gap-4 rounded-xl border px-5 py-4 md:grid-cols-2 xl:grid-cols-4 ${darkMode ? 'border-[#23415f] bg-[#13243a]' : 'border-slate-200 bg-white'}`}>
+                    {[
+                        'Upload the SIRE 2.0 report',
+                        'Review the listed findings',
+                        'Generate operator comments',
+                        'Add a comment and draft again',
+                    ].map((step, index) => (
+                        <div key={step} className="flex items-center gap-3">
+                            <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${index === 0 ? 'bg-[#0f6fb8] text-white' : 'bg-[#17395c] text-[#9db2c8]'}`}>
+                                {index + 1}
+                            </span>
+                            <span className={`text-[13px] ${darkMode ? 'text-[#c9daea]' : 'text-slate-700'}`}>{step}</span>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="flex flex-col gap-4">
                     {isLoading && (
                         <div className={`flex min-h-40 flex-col items-center justify-center gap-3 ${mutedTextClass}`}>
                             <Loader2 className="h-7 w-7 animate-spin text-sky-500" />
@@ -119,19 +129,18 @@ const Inspections = ({ darkMode }) => {
                     )}
 
                     {!isLoading && !isError && inspections.length > 0 && (
-                        <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700/60">
-                            <div className={`grid grid-cols-[1fr_1fr_1fr_auto_auto] gap-4 border-b px-4 py-3 text-xs font-semibold uppercase tracking-wide ${darkMode ? 'border-slate-700/60 text-slate-400' : 'border-slate-200 text-slate-500'}`}>
-                                <span>Vessel</span>
-                                <span>Inspection date</span>
-                                <span>Report</span>
-                                <span className="sr-only">Action</span>
-                                <span className="sr-only">Archive</span>
+                        <div className={`overflow-hidden rounded-xl border ${darkMode ? 'border-[#1c3149] bg-[#13243a]' : 'border-slate-200 bg-white'}`}>
+                            <div className={`grid grid-cols-[1fr_1fr_1fr_auto_auto] gap-4 border-b bg-[#23415f] px-5 py-3 text-xs font-medium ${darkMode ? 'border-[#1c3149] text-[#9db2c8]' : 'border-slate-200 text-slate-500'}`}>
+                                <span className={`${darkMode ? 'text-slate-400' : 'text-slate-300'}`}>Vessel</span>
+                                <span className={`${darkMode ? 'text-slate-400' : 'text-slate-300'}`}>Inspection date</span>
+                                <span className={`${darkMode ? 'text-slate-400' : 'text-slate-300'}`}>Report</span>
+                                <span className={`${darkMode ? 'text-slate-400' : 'text-slate-300'}`}>Actions</span>
                             </div>
                             <div className={`divide-y ${darkMode ? 'divide-slate-700/60' : 'divide-slate-200'}`}>
                                 {inspections.map((inspection) => (
                                     <div
                                         key={inspection.id}
-                                        className={`grid grid-cols-[1fr_1fr_1fr_auto_auto] items-center gap-4 px-4 py-4 transition-colors ${darkMode ? 'hover:bg-slate-800/60' : 'hover:bg-slate-50'}`}
+                                        className={`grid grid-cols-[1fr_1fr_1fr_auto_auto] items-center gap-4 px-5 py-4 transition-colors ${darkMode ? 'hover:bg-[#0e1b2c]' : 'hover:bg-slate-50'}`}
                                     >
                                         <span className={`font-semibold text-sm ${darkMode ? 'text-slate-100' : 'text-slate-800'}`}>{getVesselLabel(inspection)}</span>
                                         <span className={`inline-flex items-center gap-2 text-xs ${mutedTextClass}`}><CalendarDays className="h-4 w-4" />{formatDate(inspection.inspection_date)}</span>

@@ -3,6 +3,7 @@ export const ROUTES = {
   CHAT: '/chat',
   KNOWLEDGE_SOURCES: '/knowledge-sources',
   OPERATOR_COMMENTS: '/operator-comments',
+  OPERATOR_COMMENTS_SUBMITTED: '/operator-comments/submitted',
   OPERATOR_COMMENTS_FROM_REPORT: '/operator-comments-from-report',
   OPERATOR_COMMENTS_FROM_REPORT_INSPECTIONS: '/operator-comments-from-report/inspections',
   OPERATOR_COMMENTS_FROM_REPORT_INSPECTION_DETAILS: '/operator-comments-from-report/inspections/:inspectionId',

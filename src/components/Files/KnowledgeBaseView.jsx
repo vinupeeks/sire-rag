@@ -1,7 +1,5 @@
-import React, { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Trash2, Upload, FileText, Search, Eye, X } from 'lucide-react';
-import { Button } from '../ui/Button';
-import { Input } from '../ui/Input';
 import { useSelector } from 'react-redux'; // Hook to pull theme state
 import { BASEURL } from '../../config/config';
 
@@ -32,21 +30,21 @@ const KnowledgeBaseView = ({
 
     // 🎨 Dynamic mid-tone dark vs glacier light theme configurations
     const theme = {
-        bg: darkMode ? 'bg-[#161b26]' : 'bg-[#e9eff5]',
-        textPrimary: darkMode ? 'text-slate-100' : 'text-slate-800',
-        textSecondary: darkMode ? 'text-slate-400' : 'text-slate-500',
-        border: darkMode ? 'border-slate-700/50' : 'border-slate-200',
+        bg: darkMode ? 'bg-[#0b1523]' : 'bg-[#e9eff5]',
+        textPrimary: darkMode ? 'text-[#eaf1f8]' : 'text-slate-800',
+        textSecondary: darkMode ? 'text-[#9db2c8]' : 'text-slate-500',
+        border: darkMode ? 'border-[#1c3149]' : 'border-slate-200',
 
         // Input settings
-        inputBg: darkMode ? 'bg-[#1a222f] border-slate-700/60 text-slate-100 placeholder-slate-500' : 'bg-white border-slate-300 text-slate-800 placeholder-slate-400',
-        badgeBg: darkMode ? 'bg-[#273346] text-slate-400 border-slate-700/30' : 'bg-slate-100 text-slate-600 border-slate-200',
+        inputBg: darkMode ? 'bg-[#0e1b2c] border-[#1c3149] text-slate-100 placeholder-[#7c93ac]' : 'bg-white border-slate-300 text-slate-800 placeholder-slate-400',
+        badgeBg: darkMode ? 'bg-[#17395c] text-[#9db2c8] border-[#1c3149]' : 'bg-slate-100 text-slate-600 border-slate-200',
 
         // Item grid components
-        itemCard: darkMode ? 'bg-[#273346]/60 border-slate-700/40 hover:border-slate-600' : 'bg-white border-slate-200 shadow-sm hover:border-slate-300',
-        avatarBg: darkMode ? 'bg-[#1a222f]' : 'bg-slate-100 border border-slate-200',
+        itemCard: darkMode ? 'bg-[#13243a] border-[#1c3149] hover:bg-[#0e1b2c]' : 'bg-white border-slate-200 hover:bg-slate-50',
+        avatarBg: darkMode ? 'bg-[#17395c]' : 'bg-slate-100 border border-slate-200',
 
         // Action settings
-        viewBtn: darkMode ? 'bg-[#1a222f] text-slate-400 hover:bg-slate-700 hover:text-slate-200' : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100 hover:text-slate-700',
+        viewBtn: darkMode ? 'bg-transparent text-[#9db2c8] hover:bg-[#17395c] hover:text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100 hover:text-slate-700',
         trashBtn: darkMode ? 'bg-[#1a222f] text-slate-400 hover:bg-rose-500/10 hover:text-rose-400' : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200',
         emptyStateBox: darkMode ? 'bg-[#273346]/10 border-slate-700/60' : 'bg-slate-50 border-slate-300 shadow-inner',
 
@@ -57,20 +55,28 @@ const KnowledgeBaseView = ({
     };
 
     return (
-        <div className={`h-full flex flex-col p-6 overflow-y-auto max-w-full mx-auto w-full font-sans px-5 transition-colors duration-300 ${theme.bg}`}>
+        <div className={`h-full flex flex-col p-6 overflow-y-auto max-w-full mx-auto w-full font-sans px-7 transition-colors duration-300 ${theme.bg}`}>
 
             {/* Header Title Section */}
-            <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b pb-5 mb-6 ${theme.border}`}>
+            <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                    <h1 className={`text-xl font-bold tracking-wide ${theme.textPrimary}`}>Company Files</h1>
-                    <p className={`text-xs mt-1 ${theme.textSecondary}`}>
-                        Manage documents used by your AI assistant.
+                    <div className="flex items-center gap-3">
+                        <h1 className={`text-xl font-semibold ${theme.textPrimary}`}>Company Files</h1>
+                        <span
+                            aria-label={`${pdfs.length} company files`}
+                            className={`rounded-full border px-3 py-1 text-xs font-medium ${theme.badgeBg}`}
+                        >
+                            {pdfs.length}
+                        </span>
+                    </div>
+                    <p className={`mt-1 max-w-[720px] text-[13px] leading-6 ${theme.textSecondary}`}>
+                        Your own manuals and procedures. The assistant reads these when it drafts an operator comment or answers an SMS search.
                     </p>
                 </div>
 
                 {/* Main Upload Input Button Trigger */}
                 <div>
-                    <label className={`flex h-10 items-center justify-center gap-2 cursor-pointer rounded-xl bg-[#0091ff] hover:bg-[#0077e6] text-white font-semibold px-5 text-sm shadow-md transition-all ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                        <label className={`flex h-11 items-center justify-center gap-2 cursor-pointer rounded-lg bg-[#0f6fb8] hover:bg-[#0c5f9f] text-white font-medium px-5 text-sm transition-all ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
                         {isUploading ? (
                             <>
                                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -100,12 +106,12 @@ const KnowledgeBaseView = ({
                         type="text"
                         value={searchTerm}
                         onChange={(e) => onSearch(e.target.value)}
-                        placeholder="Search documents by filename..."
-                        className={`w-full pl-11 pr-44 h-11 rounded-xl border focus:border-[#0091ff] focus:outline-none transition-colors ${theme.inputBg}`}
+                        placeholder="Search by document name..."
+                        className={`w-full max-w-[360px] pl-11 pr-4 h-10 rounded-lg border text-[13px] focus:border-[#5bc0f5] focus:outline-none transition-colors ${theme.inputBg}`}
                     />
 
                     {/* Right Side: Supports Badge */}
-                    <span className={`absolute right-3.5 z-20 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg border ${theme.badgeBg}`}>
+                    <span className={`ml-3 text-[11px] px-2.5 py-1 rounded-md border ${theme.badgeBg}`}>
                         Supports: PDF, DOCX, TXT
                     </span>
                 </div>
@@ -119,11 +125,11 @@ const KnowledgeBaseView = ({
                     <p className={`text-xs mt-1 ${theme.textSecondary}`}>Try a different search term or upload a new document.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className={`overflow-hidden rounded-xl border ${darkMode ? 'border-[#1c3149] bg-[#13243a]' : 'border-slate-200 bg-white'}`}>
                     {filteredPdfs.map((pdf) => (
-                        <div key={pdf.recordId} className={`flex items-center justify-between p-4 border rounded-xl transition-all shadow-sm ${theme.itemCard}`}>
+                        <div key={pdf.recordId} className={`flex min-h-[62px] items-center justify-between gap-4 border-b px-5 py-3 last:border-b-0 transition-colors ${theme.itemCard}`}>
                             <div className="flex items-center gap-3.5 min-w-0">
-                                <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-[#0091ff] text-xs font-bold ${theme.avatarBg}`}>
+                                <div className={`flex h-8 flex-shrink-0 items-center justify-center rounded text-[10px] font-semibold text-[#5bc0f5] px-2 ${theme.avatarBg}`}>
                                     {String(pdf.fileName || 'Doc').split('.').pop()?.toUpperCase() || 'PDF'}
                                 </div>
                                 <div className="min-w-0">
@@ -135,7 +141,7 @@ const KnowledgeBaseView = ({
                                 <button
                                     type="button"
                                     onClick={() => setPreviewUrl(`${BASEURL}/${pdf?.filePath}`)}
-                                    className={`inline-flex h-9 w-9 items-center justify-center rounded-xl border transition-all active:scale-95 ${theme.viewBtn}`}
+                                    className={`inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#2a4767] transition-all active:scale-95 ${theme.viewBtn}`}
                                     title="View File"
                                 >
                                     <Eye className="h-4 w-4" />

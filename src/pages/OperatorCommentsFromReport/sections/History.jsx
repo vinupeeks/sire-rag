@@ -86,11 +86,11 @@ const History = ({ darkMode }) => {
 
                     {!isLoading && !isError && inspections.length > 0 && (
                         <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700/60">
-                            <div className={`grid grid-cols-[1fr_1fr_1fr_auto] gap-4 border-b px-4 py-3 text-xs font-semibold uppercase tracking-wide ${darkMode ? 'border-slate-700/60 text-slate-400' : 'border-slate-200 text-slate-500'}`}>
-                                <span>Vessel</span>
-                                <span>Inspection date</span>
-                                <span>Report</span>
-                                <span className="sr-only">Action</span>
+                            <div className={`grid grid-cols-[1fr_1fr_1fr_auto_auto] gap-4 border-b bg-[#23415f] px-5 py-3 text-xs font-medium ${darkMode ? 'border-[#1c3149] text-[#9db2c8]' : 'border-slate-200 text-slate-500'}`}>
+                                <span className={`${darkMode ? 'text-slate-400' : 'text-slate-300'}`}>Vessel</span>
+                                <span className={`${darkMode ? 'text-slate-400' : 'text-slate-300'}`}>Inspection date</span>
+                                <span className={`${darkMode ? 'text-slate-400' : 'text-slate-300'}`}>Report</span>
+                                <span className={`${darkMode ? 'text-slate-400' : 'text-slate-300'}`}>Actions</span>
                             </div>
                             <div className={`divide-y ${darkMode ? 'divide-slate-700/60' : 'divide-slate-200'}`}>
                                 {inspections.map((inspection) => (

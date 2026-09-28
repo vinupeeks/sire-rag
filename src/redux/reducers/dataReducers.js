@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
     vesselName: '',
-    darkMode: false,
+    darkMode: true,
 };
 
 const dataSlice = createSlice({

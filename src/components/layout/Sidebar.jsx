@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { Plus, Settings, User, LogOut, ChevronLeft, ChevronRight, Sun, Moon, Database } from 'lucide-react';
+import { Plus, User, LogOut, ChevronLeft, ChevronRight, ChevronDown, Sun, Moon, Database, Search, ClipboardList, Check, Archive, Globe2 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { Button } from '../ui/Button';
 import { useDispatch, useSelector } from 'react-redux';
 import { toggleDarkMode } from '../../redux/reducers/dataReducers';
 import { ROUTES } from '../../constants/routes';
-import Logo from '../../assets/logo.png';
+import LogoWhite from '../../assets/logo.png';
+import LogoDark from '../../assets/logo-white.png';
 
 const Sidebar = ({
     collapsed,
@@ -15,12 +16,9 @@ const Sidebar = ({
     onSelectConversation,
     logoutFn,
     onToggle,
-    menuItems = [],
     actionButtonLabel = 'New chat',
-    onMenuItemClick = () => { },
     showConversations = true,
     showActionButton = true,
-    sidebarTitle = 'SMS Search',
     sidebarSubtitle,
 }) => {
     const dispatch = useDispatch();
@@ -28,34 +26,39 @@ const Sidebar = ({
     const navigate = useNavigate();
     const darkMode = useSelector((state) => state.data.darkMode);
     const user = useSelector((state) => state.auth.user);
+    const [knowledgeBaseOpen, setKnowledgeBaseOpen] = useState(true);
+    const isChatRoute = location.pathname.startsWith(ROUTES.CHAT);
+    const selectedSource = new URLSearchParams(location.search).get('source');
+
+    const ToggleIcon = collapsed ? ChevronRight : ChevronLeft;
 
     const handleThemeToggle = () => {
         dispatch(toggleDarkMode());
     };
 
     const theme = {
-        bg: darkMode ? 'bg-[#324057]' : 'bg-[#e9eff5]',
+        bg: darkMode ? 'bg-[#0e1b2c]' : 'bg-[#e9eff5]',
         // bg: darkMode ? 'bg-[#324057]' : 'bg-[#f4f7fa]',
-        border: darkMode ? 'border-slate-700/50' : 'border-[#e2e8f0]',
-        textPrimary: darkMode ? 'text-slate-100' : 'text-slate-800',
-        textSecondary: darkMode ? 'text-slate-300' : 'text-slate-500',
-        textTimestamp: darkMode ? 'text-slate-400' : 'text-slate-400',
+        border: darkMode ? 'border-[#1c3149]' : 'border-[#23415f]',
+        textPrimary: darkMode ? 'text-[#eaf1f8]' : 'text-slate-800',
+        textSecondary: darkMode ? 'text-[#9db2c8]' : 'text-slate-500',
+        textTimestamp: darkMode ? 'text-[#7c93ac]' : 'text-slate-400',
 
         // Active Chat Selection States
         activeItem: darkMode
-            ? 'border-sky-500/40 bg-[#2d394d] text-slate-100 shadow-sm'
+            ? 'border-[#17395c] bg-[#17395c] text-[#eaf1f8] shadow-sm'
             : 'border-sky-200 bg-white text-slate-900 shadow-sm shadow-sky-100/40',
         inactiveItem: darkMode
-            ? 'text-slate-300 hover:bg-[#273346] hover:text-slate-100'
+            ? 'text-[#9db2c8] hover:bg-[#13243a] hover:text-[#eaf1f8]'
             : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900',
 
         // Letter Avatar Badges
-        avatarActive: darkMode ? 'bg-sky-500 text-white' : 'bg-sky-600 text-white',
+        avatarActive: darkMode ? 'bg-[#0f6fb8] text-white' : 'bg-sky-600 text-white',
         avatarInactive: darkMode ? 'bg-[#2d394d] text-slate-300' : 'bg-slate-200 text-slate-600',
 
         // Control Interfaces
-        footerBg: darkMode ? 'bg-[#445c85]' : 'bg-[#dae7f4]',
-        cardBg: darkMode ? 'bg-[#273346] border-slate-700/50' : 'bg-white border-[#e2e8f0]',
+        footerBg: darkMode ? 'bg-[#0e1b2c]' : 'bg-[#dae7f4]',
+        cardBg: darkMode ? 'bg-[#13243a] border-[#1c3149]' : 'bg-white border-[#e2e8f0]',
         actionBtn: darkMode
             ? 'bg-sky-500 text-white hover:bg-sky-400 shadow-md'
             : 'bg-white border border-slate-300 text-slate-900 hover:bg-slate-50 shadow-sm',
@@ -70,158 +73,153 @@ const Sidebar = ({
         <div className={`flex h-[100vh] flex-col overflow-hidden font-sans transition-all duration-300 ease-in-out ${theme.bg} ${theme.textPrimary}`}>
 
             {/* Header Section */}
-            <div className={`flex min-h-[3.5rem] items-center justify-between gap-2 border-b px-2 py-2 sm:gap-3 sm:px-1 ${theme.border}`}>
-                <div className="group relative flex items-center gap-2 sm:gap-2">
+            <div className={`flex min-h-[3.75rem] flex-col border-b px-4 py-3 ${theme.border}`}>
 
-                    <div className="flex h-7 w-20 items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-300 to-blue-300 shadow-lg p-2 flex-shrink-0">
+                {/* Logo + Toggle */}
+                <div className="flex items-center justify-between">
+                    <div className="group w-full flex h-8 w-26 items-center justify-between rounded-2xl p-2 flex-shrink-0">
                         <img
-                            src={Logo}
-                            alt="Logo"
-                            className="w-full h-full object-contain"
+                            src={darkMode ? LogoDark : LogoWhite}
+                            alt="Solmarine"
+                            className={`h-8 object-contain object-left ${collapsed ? 'w-15 hidden' : 'w-32'
+                                }`}
                         />
-                    </div>
 
-                    {!collapsed && (
-                        <div className="min-w-0 flex-1">
-                            <p className="truncate text-xs font-bold uppercase tracking-wider leading-tight">{sidebarTitle}</p>
-                            <p className={`truncate text-[10px] font-semibold tracking-wide leading-none mt-0.5 ${darkMode ? 'text-sky-400' : 'text-sky-600'}`}>{sidebarSubtitle}</p>
-                        </div>
-                    )}
+                        <img
+                            src="/small-icon.png"
+                            alt="Solmarine"
+                            className={`h-8 object-contain object-left  ${collapsed ? 'w-15 block group-hover:hidden' : 'hidden'
+                                }`}
+                        />
 
-                    {collapsed && (
                         <Button
                             variant="ghost"
                             size="icon"
                             onClick={onToggle}
-                            className={`absolute left-0 top-0 h-9 w-9 rounded-xl opacity-0 transition-opacity duration-200 group-hover:opacity-100 sm:h-11 sm:w-11 ${darkMode ? 'bg-slate-700/90 text-slate-200' : 'bg-white/90 text-slate-700 shadow-xs border border-slate-200'
-                                }`}
+                            className={`min-h-[2rem] min-w-[2rem] flex-shrink-0 rounded-lg ${darkMode
+                                ? 'text-slate-300 hover:bg-slate-700/50 hover:text-slate-100'
+                                : 'text-slate-500 hover:bg-slate-200/70 hover:text-slate-800'
+                                } ${collapsed && "hidden group-hover:flex"}`}
                         >
-                            <ChevronRight className="h-4 w-4" />
+                            <ToggleIcon className="h-4 w-4" />
                         </Button>
-                    )}
-                </div>
+                    </div>
 
-                {!collapsed && (
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={onToggle}
-                        className={`flex-shrink-0 min-h-[2rem] min-w-[2rem] rounded-lg ${darkMode ? 'text-slate-300 hover:text-slate-100 hover:bg-slate-700/50' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/70'
-                            }`}
-                    >
-                        <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                )}
+                    {/* {!collapsed && ( */}
+                    {/* )} */}
+                </div>
             </div>
 
-            {/* Context-Specific Menu Items */}
-            {menuItems.length > 0 && !collapsed && (
-                <div className="px-2 py-2 border-b space-y-1">
-                    {menuItems.map((item) => (
-                        <button
-                            key={item.id}
-                            type="button"
-                            onClick={() => onMenuItemClick(item.id)}
-                            className={`flex w-full items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wide transition-all ${
-                                item.isActive
-                                    ? `bg-[#0091ff] text-white shadow-sm shadow-[#0091ff]/20`
-                                    : darkMode
-                                        ? 'text-slate-300 hover:bg-[#273346] hover:text-slate-100'
-                                        : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900'
-                            }`}
-                        >
-                            {item.icon && <item.icon className="h-4 w-4 flex-shrink-0" />}
-                            <span>{item.label}</span>
-                        </button>
-                    ))}
-                </div>
-            )}
-
-            {/* New Chat Action Layer */}
-            {showActionButton && !collapsed ? (
-                <div className="px-3 py-3">
-                    <Button
-                        variant="default"
-                        className={`w-full py-2.5 text-xs sm:text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-2 ${theme.actionBtn}`}
-                        onClick={onNewConversation}
-                    >
-                        <Plus className="h-3.5 w-3.5 flex-shrink-0 sm:h-4 sm:w-4" />
-                        <span className="hidden sm:inline">{actionButtonLabel}</span>
-                        <span className="sm:hidden">New</span>
-                    </Button>
-                </div>
-            ) : showActionButton ? (
-                <div className="flex flex-col items-center gap-2 py-3">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={onNewConversation}
-                        className={`min-h-[2.25rem] min-w-[2.25rem] rounded-xl ${theme.actionBtn}`}
-                    >
-                        <Plus className="h-4 w-4" />
-                    </Button>
-                </div>
-            ) : null}
-
-            {/* Chat List Stream */}
-            {showConversations && (
-                <div className="flex-1 overflow-y-auto px-2 py-1">
-                    <div className="space-y-1">
-                        {conversations.map((conversation) => {
-                            const active = conversation.id === activeConversationId;
-                            return (
-                                <button
-                                    key={conversation.id}
-                                    type="button"
-                                    onClick={() => onSelectConversation(conversation.id)}
-                                    className={`flex w-full min-h-[2.75rem] items-center gap-3 rounded-xl border relative px-3 py-2 text-left text-xs transition-all duration-200 group ${active ? theme.activeItem : theme.inactiveItem
-                                        } ${collapsed ? 'justify-center px-0' : ''}`}
-                                >
-                                    {/* Left Active Bar Indicator */}
-                                    {active && !collapsed && (
-                                        <div className={`absolute left-0 top-2.5 bottom-2.5 w-[3px] rounded-r-md ${darkMode ? 'bg-sky-400' : 'bg-sky-500'}`} />
-                                    )}
-
-                                    <div className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg text-[10px] font-bold border transition-colors ${active ? `${theme.avatarActive}` : `${theme.avatarInactive} ${darkMode ? 'border-slate-600/50' : 'border-slate-300/40'}`
-                                        }`}>
-                                        {conversation.title?.charAt(0).toUpperCase()}
-                                    </div>
-
-                                    {!collapsed && (
-                                        <div className="min-w-0 flex-1 pl-0.5">
-                                            <p className={`truncate text-xs font-medium leading-normal ${active ? 'font-bold' : ''}`}>
-                                                {conversation.title}
-                                            </p>
-                                            <p className={`truncate text-[10px] mt-0.5 ${theme.textTimestamp}`}>{conversation.updated}</p>
-                                        </div>
-                                    )}
-                                </button>
-                            );
-                        })}
+            {!collapsed && (
+                <nav className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                    <div className="shrink-0 border-b border-[#1c3149] px-3 py-3">
+                        <p className={`px-3 pb-1 text-[15px] font-medium ${theme.textPrimary}`}>Operator comments</p>
+                        {[
+                            { label: 'Inspections', icon: ClipboardList, path: ROUTES.OPERATOR_COMMENTS_FROM_REPORT_INSPECTIONS, active: location.pathname.startsWith(ROUTES.OPERATOR_COMMENTS_FROM_REPORT_INSPECTIONS) && !location.state?.fromHistory },
+                            // { label: 'Submitted', icon: Check, path: ROUTES.OPERATOR_COMMENTS_SUBMITTED, active: location.pathname === ROUTES.OPERATOR_COMMENTS_SUBMITTED },
+                            { label: 'Archived', icon: Archive, path: ROUTES.OPERATOR_COMMENTS_FROM_REPORT_HISTORY, active: location.pathname === ROUTES.OPERATOR_COMMENTS_FROM_REPORT_HISTORY || location.state?.fromHistory === true },
+                        ].map(({ label, icon: Icon, path, active }) => (
+                            <button
+                                key={label}
+                                type="button"
+                                onClick={() => navigate(path)}
+                                className={`flex w-full items-center gap-3 rounded-lg px-3.5 py-2.5 text-xs ml-2 font-medium transition-colors ${active ? theme.activeItem : theme.inactiveItem}`}
+                            >
+                                <Icon className={`h-[17px] w-[17px] ${active ? (darkMode ? 'text-[#5bc0f5]' : 'text-sky-600') : (darkMode ? 'text-[#7c93ac]' : 'text-slate-500')}`} />
+                                {label}
+                            </button>
+                        ))}
                     </div>
-                </div>
-            )}
-            {!showConversations && (
-                <div className="flex-1 overflow-y-auto px-2 py-1" />
+
+                    <div className="flex min-h-0 flex-1 flex-col border-b border-[#1c3149] px-3 py-3">
+                        <p className={`shrink-0 px-3 pb-1 text-[15px] font-medium ${theme.textPrimary}`}>Ask a question</p>
+                        <button
+                            type="button"
+                            onClick={() => navigate(ROUTES.CHAT)}
+                            className={`ml-2 flex w-full shrink-0 items-center gap-3 rounded-lg px-3.5 py-2.5 text-xs font-medium transition-colors ${isChatRoute ? theme.activeItem : theme.inactiveItem}`}
+                        >
+                            <Search className={`h-[17px] w-[17px] ${isChatRoute ? (darkMode ? 'text-[#5bc0f5]' : 'text-sky-600') : (darkMode ? 'text-[#7c93ac]' : 'text-slate-500')}`} />
+                            SMS Search
+                        </button>
+
+                        {isChatRoute && showActionButton && (
+                            <div className="mt-1 ml-2 px-1">
+                                <button
+                                    type="button"
+                                    className={`flex h-7 w-full items-center justify-center rounded-lg px-2.5 text-xs font-medium ${theme.actionBtn}`}
+                                    onClick={onNewConversation}
+                                >
+                                    <Plus className="mr-1 h-3.5 w-3.5" />
+                                    {actionButtonLabel}
+                                </button>
+                            </div>
+                        )}
+
+                        {isChatRoute && showConversations && (
+                            <div className="mt-1 ml-3 min-h-0 flex-1 space-y-0.5 overflow-y-auto overscroll-contain pr-1">
+                                {conversations.map((conversation) => {
+                                    const active = conversation.id === activeConversationId;
+                                    return (
+                                        <button
+                                            key={conversation.id}
+                                            type="button"
+                                            onClick={() => onSelectConversation(conversation.id)}
+                                            className={`flex min-h-10 w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-xs transition-colors ${active ? theme.activeItem : theme.inactiveItem}`}
+                                        >
+                                            <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[10px] font-semibold ${active ? theme.avatarActive : theme.avatarInactive}`}>
+                                                {conversation.title?.charAt(0).toUpperCase()}
+                                            </span>
+                                            <span className="min-w-0 flex-1">
+                                                <span className="block truncate text-[11px] font-medium leading-tight">{conversation.title}</span>
+                                                <span className={`block truncate text-[9px] leading-3 ${theme.textTimestamp}`}>{conversation.updated}</span>
+                                            </span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        )}
+
+                        <div className="mt-2 shrink-0">
+                            <button
+                                type="button"
+                                aria-expanded={knowledgeBaseOpen}
+                                aria-controls="knowledge-base-menu"
+                                onClick={() => setKnowledgeBaseOpen((open) => !open)}
+                                className={`flex w-full items-center justify-between rounded-md px-3 py-1.5 text-left text-[15px] font-medium ${theme.textPrimary} ${darkMode ? 'hover:text-[#eaf1f8]' : 'hover:text-slate-900'}`}
+                            >
+                                Knowledge base
+                                <ChevronDown className={`h-3.5 w-3.5 transition-transform ${knowledgeBaseOpen ? '' : '-rotate-90'}`} />
+                            </button>
+                            {knowledgeBaseOpen && (
+                                <div id="knowledge-base-menu" className="mt-0.5 space-y-0.5">
+                                    {[
+                                        { label: 'Company Files', icon: Database, source: 'company-files' },
+                                        { label: 'Common Files', icon: Globe2, source: 'common-files' },
+                                    ].map(({ label, icon: Icon, source }) => {
+                                        const active = location.pathname.startsWith(ROUTES.KNOWLEDGE_SOURCES)
+                                            && (source === 'common-files' ? selectedSource === source : selectedSource !== 'common-files');
+                                        return (
+                                            <button
+                                                key={source}
+                                                type="button"
+                                                onClick={() => navigate(`${ROUTES.KNOWLEDGE_SOURCES}?source=${source}`)}
+                                                className={`flex w-full items-center gap-3 rounded-lg px-3.5 py-2.5 text-xs ml-2 font-medium transition-colors ${active ? theme.activeItem : theme.inactiveItem}`}
+                                            >
+                                                <Icon className={`h-[17px] w-[17px] ${active ? (darkMode ? 'text-[#5bc0f5]' : 'text-sky-600') : (darkMode ? 'text-[#7c93ac]' : 'text-slate-500')}`} />
+                                                {label}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                </nav>
             )}
 
             {/* Footer / Profile Information Block */}
-            <div className={`border-t rounded-t-[24px] px-2 py-2 ${theme.border} ${theme.footerBg}`}>
-                <Button
-                    variant="ghost"
-                    onClick={() => navigate(ROUTES.KNOWLEDGE_SOURCES)}
-                    className={`mb-2 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold transition-colors ${location.pathname.startsWith(ROUTES.KNOWLEDGE_SOURCES)
-                        ? 'bg-[#0091ff] !text-white shadow-sm shadow-[#0091ff]/20'
-                        : darkMode
-                            ? '!text-slate-300 hover:bg-[#273346] hover:!text-slate-100'
-                            : '!text-slate-600 hover:bg-slate-200/60 hover:!text-slate-900'
-                        } ${collapsed ? 'justify-center px-0' : 'justify-start'}`}
-                    title="Knowledge Sources"
-                >
-                    <Database className="h-4 w-4 flex-shrink-0" />
-                    {!collapsed && <span >KNOWLEDGE SOURCES</span>}
-                </Button>
-
+            <div className={`border-t px-3 py-3 ${theme.border} ${theme.footerBg}`}>
                 {!collapsed ? (
                     <div className={`flex items-center justify-between gap-2 rounded-xl p-1.5 border ${theme.cardBg}`}>
                         <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -235,7 +233,7 @@ const Sidebar = ({
                             </div>
 
                             <div className="min-w-0 flex-1">
-                                <p className="truncate text-[11px] font-semibold leading-tight">
+                                <p className="truncate text-[14px] font-semibold leading-tight">
                                     {user?.fullname}
                                 </p>
                                 <p
@@ -261,23 +259,33 @@ const Sidebar = ({
                         </Button>
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center gap-1 py-1">
+                    <div className="flex flex-col items-center gap-2 py-1">
                         <Button
                             variant="ghost"
                             size="icon"
-                            className={`h-5 w-9 rounded-xl ${darkMode
-                                ? 'text-slate-300 hover:text-slate-100 hover:bg-slate-700'
-                                : 'text-slate-500 hover:text-slate-800 hover:bg-white border border-slate-200 shadow-xs'
+                            onClick={onToggle}
+                            aria-label="Expand sidebar to view account details"
+                            title="Expand sidebar to view account details"
+                            className={`h-9 w-9 rounded-xl border ${darkMode
+                                ? 'border-[#1c3149] bg-[#13243a] text-slate-200 hover:bg-[#17395c]'
+                                : 'border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-100'
                                 }`}
                         >
-                            <User className="h-4 w-4" />
+                            {user?.fullname?.trim()
+                                ? <span className="text-sm font-semibold">{user.fullname.trim().charAt(0).toUpperCase()}</span>
+                                : <User className="h-4 w-4" />}
                         </Button>
 
                         <Button
-                            variant="default"
+                            variant="ghost"
                             size="icon"
                             onClick={logoutFn}
-                            className={`h-5 w-9 rounded-xl ${theme.logoutBtn}`}
+                            aria-label="Log out"
+                            title="Log out"
+                            className={`h-9 w-9 rounded-xl ${darkMode
+                                ? 'text-slate-300 hover:bg-rose-500/10 hover:text-rose-300'
+                                : 'text-slate-600 hover:bg-rose-50 hover:text-rose-600'
+                                }`}
                         >
                             <LogOut className="h-4 w-4" />
                         </Button>

@@ -23,19 +23,20 @@ const OcimfFilesView = ({ files = [], onUpload, onDelete, isUploading = false })
     };
 
     const theme = {
-        bg: darkMode ? 'bg-[#161b26]' : 'bg-[#e9eff5]',
-        textPrimary: darkMode ? 'text-slate-100' : 'text-slate-800',
-        textSecondary: darkMode ? 'text-slate-400' : 'text-slate-500',
-        border: darkMode ? 'border-slate-700/50' : 'border-slate-200',
+        bg: darkMode ? 'bg-[#0b1523]' : 'bg-[#e9eff5]',
+        textPrimary: darkMode ? 'text-[#eaf1f8]' : 'text-slate-800',
+        textSecondary: darkMode ? 'text-[#9db2c8]' : 'text-slate-500',
+        border: darkMode ? 'border-[#1c3149]' : 'border-slate-200',
+        badgeBg: darkMode ? 'bg-[#17395c] text-[#9db2c8] border-[#1c3149]' : 'bg-slate-100 text-slate-600 border-slate-200',
         inputBg: darkMode
-            ? 'bg-[#1a222f] border-slate-700/60 text-slate-100 placeholder-slate-500'
+            ? 'bg-[#0e1b2c] border-[#1c3149] text-slate-100 placeholder-[#7c93ac]'
             : 'bg-white border-slate-300 text-slate-800 placeholder-slate-400',
         itemCard: darkMode
-            ? 'bg-[#273346]/60 border-slate-700/40 hover:border-slate-600'
-            : 'bg-white border-slate-200 shadow-sm hover:border-slate-300',
-        avatarBg: darkMode ? 'bg-[#1a222f]' : 'bg-slate-100 border border-slate-200',
+            ? 'bg-[#13243a] border-[#1c3149] hover:bg-[#0e1b2c]'
+            : 'bg-white border-slate-200 hover:bg-slate-50',
+        avatarBg: darkMode ? 'bg-[#17395c]' : 'bg-slate-100 border border-slate-200',
         viewBtn: darkMode
-            ? 'bg-[#1a222f] text-slate-400 hover:bg-slate-700 hover:text-slate-200'
+            ? 'bg-transparent text-[#9db2c8] hover:bg-[#17395c] hover:text-slate-100'
             : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100 hover:text-slate-700',
         emptyStateBox: darkMode ? 'bg-[#273346]/10 border-slate-700/60' : 'bg-slate-50 border-slate-300 shadow-inner',
         modalContent: darkMode ? 'bg-[#1e2533] border border-slate-700/80 shadow-2xl' : 'bg-white border border-slate-200 shadow-2xl',
@@ -43,15 +44,23 @@ const OcimfFilesView = ({ files = [], onUpload, onDelete, isUploading = false })
     };
 
     return (
-        <div className={`h-full flex flex-col overflow-y-auto p-6 px-5 font-sans ${theme.bg}`}>
-            <div className={`mb-6 flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-center sm:justify-between ${theme.border}`}>
+        <div className={`h-full flex flex-col overflow-y-auto p-6 px-7 font-sans ${theme.bg}`}>
+            <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                    <h1 className={`text-xl font-bold tracking-wide ${theme.textPrimary}`}>Common Files</h1>
-                    <p className={`mt-1 text-xs ${theme.textSecondary}`}>View reference documents available to your AI assistant.</p>
+                    <div className="flex items-center gap-3">
+                        <h1 className={`text-xl font-semibold ${theme.textPrimary}`}>Common Files</h1>
+                        <span
+                            aria-label={`${files.length} common files`}
+                            className={`rounded-full border px-3 py-1 text-xs font-medium ${theme.badgeBg}`}
+                        >
+                            {files.length}
+                        </span>
+                    </div>
+                    <p className={`mt-1 max-w-[760px] text-[13px] leading-6 ${theme.textSecondary}`}>Industry rules and guidance that apply to every operator. The assistant reads these alongside your own Company Files.</p>
                 </div>
                 <div className="flex items-center gap-3">
                     {onUpload && (
-                        <label className={`flex h-10 cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#0091ff] px-5 text-sm font-semibold text-white shadow-md transition-all hover:bg-[#0077e6] ${isUploading ? 'pointer-events-none opacity-50' : ''}`}>
+                        <label className={`flex h-11 cursor-pointer items-center justify-center gap-2 rounded-lg bg-[#0f6fb8] px-5 text-sm font-medium text-white transition-all hover:bg-[#0c5f9f] ${isUploading ? 'pointer-events-none opacity-50' : ''}`}>
                             {isUploading ? (
                                 <>
                                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -66,9 +75,6 @@ const OcimfFilesView = ({ files = [], onUpload, onDelete, isUploading = false })
                             <input ref={fileInputRef} type="file" accept=".pdf,.docx,.txt" className="hidden" onChange={handleFileChange} disabled={isUploading} />
                         </label>
                     )}
-                    <span className={`rounded-lg border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${darkMode ? 'border-slate-700/30 bg-[#273346] text-slate-400' : 'border-slate-200 bg-slate-100 text-slate-600'}`}>
-                        {files.length} files
-                    </span>
                 </div>
             </div>
 
@@ -78,8 +84,8 @@ const OcimfFilesView = ({ files = [], onUpload, onDelete, isUploading = false })
                     type="text"
                     value={searchTerm}
                     onChange={(event) => setSearchTerm(event.target.value)}
-                    placeholder="Search OCIMF files by filename..."
-                    className={`h-11 w-full rounded-xl border pl-11 pr-4 focus:border-[#0091ff] focus:outline-none ${theme.inputBg}`}
+                    placeholder="Search by document name..."
+                    className={`h-10 w-full max-w-[360px] rounded-lg border pl-11 pr-4 text-[13px] focus:border-[#5bc0f5] focus:outline-none ${theme.inputBg}`}
                 />
             </div>
 
@@ -90,11 +96,11 @@ const OcimfFilesView = ({ files = [], onUpload, onDelete, isUploading = false })
                     <p className={`mt-1 text-xs ${theme.textSecondary}`}>No files match the current search.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className={`overflow-hidden rounded-xl border ${darkMode ? 'border-[#1c3149] bg-[#13243a]' : 'border-slate-200 bg-white'}`}>
                     {filteredFiles.map((file) => (
-                        <div key={file.recordId || file.fileName} className={`flex items-center justify-between rounded-xl border p-4 shadow-sm ${theme.itemCard}`}>
+                        <div key={file.recordId || file.fileName} className={`flex min-h-[62px] items-center justify-between gap-4 border-b px-5 py-3 last:border-b-0 transition-colors ${theme.itemCard}`}>
                             <div className="flex min-w-0 items-center gap-3.5">
-                                <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-xs font-bold text-[#0091ff] ${theme.avatarBg}`}>
+                                <div className={`flex h-8 flex-shrink-0 items-center justify-center rounded px-2 text-[10px] font-semibold text-[#5bc0f5] ${theme.avatarBg}`}>
                                     {String(file.fileName || 'Doc').split('.').pop()?.toUpperCase() || 'FILE'}
                                 </div>
                                 <p className={`truncate text-sm font-medium ${theme.textPrimary}`}>{file.fileName}</p>
@@ -103,7 +109,7 @@ const OcimfFilesView = ({ files = [], onUpload, onDelete, isUploading = false })
                                 <button
                                     type="button"
                                     onClick={() => setPreviewUrl(`${BASEURL}/${file.filePath}`)}
-                                    className={`inline-flex h-9 w-9 items-center justify-center rounded-xl border transition-all active:scale-95 ${theme.viewBtn}`}
+                                    className={`inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#2a4767] transition-all active:scale-95 ${theme.viewBtn}`}
                                     title="View File"
                                 >
                                     <Eye className="h-4 w-4" />

@@ -53,6 +53,13 @@ const SourceTypeBadge = ({ darkMode, source, files }) => {
     );
 };
 
+const formatText = (text) => {
+    if (!text) return 'N/A';
+
+    const lower = text.toLowerCase();
+    return lower.charAt(0).toUpperCase() + lower.slice(1);
+};
+
 const MetadataBadge = ({ darkMode, value, accent = 'slate' }) => {
     const accentClasses = {
         amber: darkMode ? 'border-amber-400/30 bg-amber-400/10 text-amber-300' : 'border-amber-200 bg-amber-50 text-amber-700',
@@ -62,7 +69,7 @@ const MetadataBadge = ({ darkMode, value, accent = 'slate' }) => {
 
     return (
         <span className={`inline-flex max-w-full items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs ${accentClasses[accent]}`}>
-            <span className="truncate font-semibold">{value || 'N/A'}</span>
+            <span className="truncate font-semibold"> {formatText(value)} </span>
         </span>
     );
 };
@@ -134,14 +141,14 @@ const ArchivedInspectionItem = ({ details, darkMode, files = [] }) => {
                                 <p className={`mt-1 text-sm font-semibold leading-6 ${darkMode ? 'text-slate-200' : 'text-slate-800'}`}>{details.soc || '--:--'}</p>
                             </div>
                             <div className={`rounded-lg border px-4 py-3 ${darkMode ? 'border-sky-400/20 bg-slate-900/40' : 'border-sky-200/80 bg-white/80'}`}>
-                                <p className={`text-xs font-bold uppercase tracking-wider ${darkMode ? 'text-sky-400' : 'text-sky-700'}`}>Response</p>
+                                <p className={`text-xs font-bold tracking-wider ${darkMode ? 'text-sky-400' : 'text-sky-700'}`}>Response</p>
                                 <p className={`mt-1 text-sm font-semibold leading-6 ${darkMode ? 'text-slate-200' : 'text-slate-800'}`}>{observation?.response || '--:--'}</p>
                             </div>
                         </div>
 
                         <div className={`mt-2 ${darkMode ? 'border-slate-700/50' : 'border-slate-200/80'}`}>
                             <div className={`mb-1 rounded-xl border p-4 ${darkMode ? 'border-sky-500/30 bg-sky-500/10' : 'border-sky-200 bg-sky-50/50'}`}>
-                                <dt className={`text-xs font-bold uppercase tracking-wider ${darkMode ? 'text-sky-400' : 'text-sky-700'}`}>Inspector Remark</dt>
+                                <dt className={`text-xs font-bold tracking-wider ${darkMode ? 'text-sky-400' : 'text-sky-700'}`}>Inspector Remark</dt>
                                 <dd className={`mt-2 text-sm font-medium leading-relaxed ${darkMode ? 'text-slate-100' : 'text-slate-900'}`}>{observation?.remark || '--:--'}</dd>
                             </div>
 

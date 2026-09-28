@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { AlertCircle, CheckCircle2, FileCheck2, FileUp, Loader2, UploadCloud } from 'lucide-react';
+import { AlertCircle, CheckCircle2, FileCheck2, Loader2, UploadCloud } from 'lucide-react';
 import { toast } from 'sonner';
 import { useExtractInspectionPdfMutation, useUploadInspectionPdfMutation } from '../../../redux/services/inspectionsApi';
 import { ROUTES } from '../../../constants/routes';
@@ -23,7 +23,7 @@ const ReportUpload = ({ darkMode }) => {
     const [extractInspectionPdf] = useExtractInspectionPdfMutation();
 
     const isProcessing = phase !== 'idle';
-    const panelClass = darkMode ? 'border-slate-700/60 bg-[#1a2233]' : 'border-slate-200 bg-white';
+    const panelClass = darkMode ? 'border-[#1c3149] bg-[#13243a]' : 'border-slate-200 bg-white';
     const mutedTextClass = darkMode ? 'text-slate-400' : 'text-slate-500';
 
     // Extracted validation logic for both click-to-upload and drag-and-drop
@@ -95,24 +95,17 @@ const ReportUpload = ({ darkMode }) => {
     // Dynamic styling for the dropzone based on dragging state
     const dropzoneClass = isDragging
         ? (darkMode ? 'border-sky-500 bg-sky-900/20' : 'border-sky-500 bg-sky-50')
-        : (darkMode ? 'border-slate-600 hover:border-sky-500 hover:bg-slate-900/40' : 'border-slate-300 hover:border-sky-500 hover:bg-sky-50/40');
+        : (darkMode ? 'border-[#2a4767] bg-[#0e1b2c] hover:border-sky-500 hover:bg-[#102238]' : 'border-slate-300 hover:border-sky-500 hover:bg-sky-50/40');
 
     return (
-        <section className={`flex-1 overflow-auto p-6 ${darkMode ? 'bg-[#111827]' : 'bg-slate-100'}`}>
-            <div className={`mx-auto max-w-4xl rounded-2xl border ${panelClass}`}>
-                <div className={`border-b px-6 py-5 ${darkMode ? 'border-slate-700/60' : 'border-slate-200'}`}>
-                    <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/10 text-sky-500">
-                            <FileUp className="h-5 w-5" />
-                        </div>
-                        <div>
-                            <h1 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>Upload inspection report</h1>
-                            <p className={`mt-1 text-sm ${mutedTextClass}`}>Upload a report to generate inspection items for review.</p>
-                        </div>
-                    </div>
+        <section className={`flex-1 overflow-auto px-7 py-6 ${darkMode ? 'bg-[#0b1523]' : 'bg-slate-100'}`}>
+            <div className="mx-auto flex h-full max-w-[1200px] flex-col gap-5">
+                <div>
+                    <h1 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>Inspections</h1>
+                    <p className={`mt-1 text-[13px] ${mutedTextClass}`}>Pick an inspection to write operator comments on its findings.</p>
                 </div>
 
-                <form onSubmit={(event) => event.preventDefault()} className="space-y-6 p-6">
+                <form onSubmit={(event) => event.preventDefault()} className={`flex flex-1 flex-col items-center justify-center space-y-5 rounded-xl border p-8 text-center ${panelClass}`}>
                     <input ref={inputRef} type="file" accept="application/pdf,.pdf" onChange={handleFileChange} className="sr-only" disabled={isProcessing} />
 
                     <button
@@ -122,7 +115,7 @@ const ReportUpload = ({ darkMode }) => {
                         onDragLeave={handleDragLeave}
                         onDrop={handleDrop}
                         disabled={isProcessing}
-                        className={`flex w-full flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-12 text-center transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${dropzoneClass}`}
+                        className={`flex w-full max-w-3xl flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-12 text-center transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${dropzoneClass}`}
                     >
                         {selectedFile ? <FileCheck2 className="h-10 w-10 text-emerald-500" /> : <UploadCloud className={`h-10 w-10 ${isDragging ? 'text-sky-400 scale-110 transition-transform' : 'text-sky-500'}`} />}
                         <span className={`mt-4 text-sm font-semibold ${darkMode ? 'text-slate-100' : 'text-slate-800'}`}>

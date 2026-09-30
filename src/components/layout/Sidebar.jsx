@@ -113,7 +113,7 @@ const Sidebar = ({
             {!collapsed && (
                 <nav className="flex min-h-0 flex-1 flex-col overflow-hidden">
                     <div className="shrink-0 border-b border-[#1c3149] px-3 py-3">
-                        <p className={`px-3 pb-1 text-[15px] font-medium ${theme.textPrimary}`}>Operator comments</p>
+                        <p className={`px-3 pb-1 text-xl font-medium ${theme.textPrimary}`}>Operator comments</p>
                         {[
                             { label: 'Inspections', icon: ClipboardList, path: ROUTES.OPERATOR_COMMENTS_FROM_REPORT_INSPECTIONS, active: location.pathname.startsWith(ROUTES.OPERATOR_COMMENTS_FROM_REPORT_INSPECTIONS) && !location.state?.fromHistory },
                             // { label: 'Submitted', icon: Check, path: ROUTES.OPERATOR_COMMENTS_SUBMITTED, active: location.pathname === ROUTES.OPERATOR_COMMENTS_SUBMITTED },
@@ -123,7 +123,7 @@ const Sidebar = ({
                                 key={label}
                                 type="button"
                                 onClick={() => navigate(path)}
-                                className={`flex w-full items-center gap-3 rounded-lg px-3.5 py-2.5 text-xs ml-2 font-medium transition-colors ${active ? theme.activeItem : theme.inactiveItem}`}
+                                className={`flex w-full items-center gap-3 rounded-lg px-3.5 py-2.5 text-sm ml-2 font-medium transition-colors ${active ? theme.activeItem : theme.inactiveItem}`}
                             >
                                 <Icon className={`h-[17px] w-[17px] ${active ? (darkMode ? 'text-[#5bc0f5]' : 'text-sky-600') : (darkMode ? 'text-[#7c93ac]' : 'text-slate-500')}`} />
                                 {label}
@@ -132,11 +132,11 @@ const Sidebar = ({
                     </div>
 
                     <div className="flex min-h-0 flex-1 flex-col border-b border-[#1c3149] px-3 py-3">
-                        <p className={`shrink-0 px-3 pb-1 text-[15px] font-medium ${theme.textPrimary}`}>Ask a question</p>
+                        <p className={`shrink-0 px-3 pb-1 text-xl font-medium ${theme.textPrimary}`}>Ask a question</p>
                         <button
                             type="button"
                             onClick={() => navigate(ROUTES.CHAT)}
-                            className={`ml-2 flex w-full shrink-0 items-center gap-3 rounded-lg px-3.5 py-2.5 text-xs font-medium transition-colors ${isChatRoute ? theme.activeItem : theme.inactiveItem}`}
+                            className={`ml-2 flex w-full shrink-0 items-center gap-3 rounded-lg px-3.5 py-2.5 text-sm font-medium transition-colors ${isChatRoute ? theme.activeItem : theme.inactiveItem}`}
                         >
                             <Search className={`h-[17px] w-[17px] ${isChatRoute ? (darkMode ? 'text-[#5bc0f5]' : 'text-sky-600') : (darkMode ? 'text-[#7c93ac]' : 'text-slate-500')}`} />
                             SMS Search
@@ -185,7 +185,7 @@ const Sidebar = ({
                                 aria-expanded={knowledgeBaseOpen}
                                 aria-controls="knowledge-base-menu"
                                 onClick={() => setKnowledgeBaseOpen((open) => !open)}
-                                className={`flex w-full items-center justify-between rounded-md px-3 py-1.5 text-left text-[15px] font-medium ${theme.textPrimary} ${darkMode ? 'hover:text-[#eaf1f8]' : 'hover:text-slate-900'}`}
+                                className={`flex w-full items-center justify-between rounded-md px-3 py-1.5 text-left text-xl font-medium ${theme.textPrimary} ${darkMode ? 'hover:text-[#eaf1f8]' : 'hover:text-slate-900'}`}
                             >
                                 Knowledge base
                                 <ChevronDown className={`h-3.5 w-3.5 transition-transform ${knowledgeBaseOpen ? '' : '-rotate-90'}`} />
@@ -203,7 +203,7 @@ const Sidebar = ({
                                                 key={source}
                                                 type="button"
                                                 onClick={() => navigate(`${ROUTES.KNOWLEDGE_SOURCES}?source=${source}`)}
-                                                className={`flex w-full items-center gap-3 rounded-lg px-3.5 py-2.5 text-xs ml-2 font-medium transition-colors ${active ? theme.activeItem : theme.inactiveItem}`}
+                                                className={`flex w-full items-center gap-3 rounded-lg px-3.5 py-2.5 text-sm ml-2 font-medium transition-colors ${active ? theme.activeItem : theme.inactiveItem}`}
                                             >
                                                 <Icon className={`h-[17px] w-[17px] ${active ? (darkMode ? 'text-[#5bc0f5]' : 'text-sky-600') : (darkMode ? 'text-[#7c93ac]' : 'text-slate-500')}`} />
                                                 {label}

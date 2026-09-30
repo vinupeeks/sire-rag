@@ -96,6 +96,7 @@ const InlineOperatorComments = ({ details, darkMode, files = [], onCommentGenera
     const [isSourcesOpen, setIsSourcesOpen] = useState(false);
     const [previewUrl, setPreviewUrl] = useState(null);
     const visibleSources = (comment?.sources || []).filter((source) => (
+        source?.filename?.trim().toLowerCase() !== 'questions.xlsx' &&
         !source?.snippet?.trim().toLowerCase().startsWith('i cannot find')
     ));
 

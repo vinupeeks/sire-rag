@@ -2,6 +2,22 @@
   animation: spin 1s linear infinite;
 }
 
+.file-list-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #64748b transparent;
+}
+
+.file-list-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.file-list-scroll::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: #64748b;
+  background-clip: content-box;
+}
+
 @keyframes spin {
   from {
     transform: rotate(0deg);

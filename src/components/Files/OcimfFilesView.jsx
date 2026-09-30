@@ -44,8 +44,8 @@ const OcimfFilesView = ({ files = [], onUpload, onDelete, isUploading = false })
     };
 
     return (
-        <div className={`h-full flex flex-col overflow-y-auto p-6 px-7 font-sans ${theme.bg}`}>
-            <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className={`h-full min-h-0 flex flex-col overflow-hidden p-6 px-7 font-sans ${theme.bg}`}>
+            <div className="mb-5 flex flex-shrink-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                     <div className="flex items-center gap-3">
                         <h1 className={`text-xl font-semibold ${theme.textPrimary}`}>Common Files</h1>
@@ -78,7 +78,7 @@ const OcimfFilesView = ({ files = [], onUpload, onDelete, isUploading = false })
                 </div>
             </div>
 
-            <div className="mb-6 relative flex items-center">
+            <div className="relative mb-6 flex flex-shrink-0 items-center">
                 <Search className="pointer-events-none absolute left-4 h-4 w-4 text-slate-400" />
                 <input
                     type="text"
@@ -96,7 +96,7 @@ const OcimfFilesView = ({ files = [], onUpload, onDelete, isUploading = false })
                     <p className={`mt-1 text-xs ${theme.textSecondary}`}>No files match the current search.</p>
                 </div>
             ) : (
-                <div className={`overflow-hidden rounded-xl border ${darkMode ? 'border-[#1c3149] bg-[#13243a]' : 'border-slate-200 bg-white'}`}>
+                <div className={`file-list-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-xl border ${darkMode ? 'border-[#1c3149] bg-[#13243a]' : 'border-slate-200 bg-white'}`}>
                     {filteredFiles.map((file) => (
                         <div key={file.recordId || file.fileName} className={`flex min-h-[62px] items-center justify-between gap-4 border-b px-5 py-3 last:border-b-0 transition-colors ${theme.itemCard}`}>
                             <div className="flex min-w-0 items-center gap-3.5">

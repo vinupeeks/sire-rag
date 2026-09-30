@@ -55,8 +55,8 @@ const Inspections = ({ darkMode }) => {
 
     return (
         <>
-            <section className={`flex-1 overflow-auto px-7 py-6 ${darkMode ? 'bg-[#0b1523]' : 'bg-slate-100'}`}>
-                <div className="mx-auto flex max-w-[1500px] flex-col gap-5">
+            <section className={`flex min-h-0 flex-1 flex-col overflow-hidden px-7 py-6 ${darkMode ? 'bg-[#0b1523]' : 'bg-slate-100'}`}>
+                <div className="mx-auto flex min-h-0 w-full max-w-[1500px] flex-1 flex-col gap-5">
                 <div className="flex items-start justify-between gap-5">
                     <div>
                         <h1 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>Inspections</h1>
@@ -102,7 +102,7 @@ const Inspections = ({ darkMode }) => {
                     ))}
                 </div>
 
-                <div className="flex flex-col gap-4">
+                <div className="flex min-h-0 flex-1 flex-col gap-4">
                     {isLoading && (
                         <div className={`flex min-h-40 flex-col items-center justify-center gap-3 ${mutedTextClass}`}>
                             <Loader2 className="h-7 w-7 animate-spin text-sky-500" />
@@ -129,14 +129,14 @@ const Inspections = ({ darkMode }) => {
                     )}
 
                     {!isLoading && !isError && inspections.length > 0 && (
-                        <div className={`overflow-hidden rounded-xl border ${darkMode ? 'border-[#1c3149] bg-[#13243a]' : 'border-slate-200 bg-white'}`}>
-                            <div className={`grid grid-cols-[1fr_1fr_1fr_auto_auto] gap-4 border-b bg-[#23415f] px-5 py-3 text-xs font-medium ${darkMode ? 'border-[#1c3149] text-[#9db2c8]' : 'border-slate-200 text-slate-500'}`}>
+                        <div className={`flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border ${darkMode ? 'border-[#1c3149] bg-[#13243a]' : 'border-slate-200 bg-white'}`}>
+                            <div className={`grid shrink-0 grid-cols-[1fr_1fr_1fr_auto_auto] gap-4 border-b bg-[#23415f] px-5 py-3 text-xs font-medium ${darkMode ? 'border-[#1c3149] text-[#9db2c8]' : 'border-slate-200 text-slate-500'}`}>
                                 <span className={`${darkMode ? 'text-slate-400' : 'text-slate-300'}`}>Vessel</span>
                                 <span className={`${darkMode ? 'text-slate-400' : 'text-slate-300'}`}>Inspection date</span>
                                 <span className={`${darkMode ? 'text-slate-400' : 'text-slate-300'}`}>Report</span>
                                 <span className={`${darkMode ? 'text-slate-400' : 'text-slate-300'}`}>Actions</span>
                             </div>
-                            <div className={`divide-y ${darkMode ? 'divide-slate-700/60' : 'divide-slate-200'}`}>
+                            <div className={`file-list-scroll min-h-0 flex-1 divide-y overflow-y-auto overscroll-contain ${darkMode ? 'divide-slate-700/60' : 'divide-slate-200'}`}>
                                 {inspections.map((inspection) => (
                                     <div
                                         key={inspection.id}

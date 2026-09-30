@@ -55,10 +55,10 @@ const KnowledgeBaseView = ({
     };
 
     return (
-        <div className={`h-full flex flex-col p-6 overflow-y-auto max-w-full mx-auto w-full font-sans px-7 transition-colors duration-300 ${theme.bg}`}>
+        <div className={`h-full min-h-0 flex flex-col overflow-hidden p-6 max-w-full mx-auto w-full font-sans px-7 transition-colors duration-300 ${theme.bg}`}>
 
             {/* Header Title Section */}
-            <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="mb-5 flex flex-shrink-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                     <div className="flex items-center gap-3">
                         <h1 className={`text-xl font-semibold ${theme.textPrimary}`}>Company Files</h1>
@@ -94,7 +94,7 @@ const KnowledgeBaseView = ({
             </div>
 
             {/* Layout Filters Utility Bar */}
-            <div className="mb-6">
+            <div className="mb-6 flex-shrink-0">
                 <div className="relative flex items-center w-full group">
                     {/* Left Side: Search Icon */}
                     <div className="absolute left-4 z-20 flex items-center pointer-events-none">
@@ -125,7 +125,7 @@ const KnowledgeBaseView = ({
                     <p className={`text-xs mt-1 ${theme.textSecondary}`}>Try a different search term or upload a new document.</p>
                 </div>
             ) : (
-                <div className={`overflow-hidden rounded-xl border ${darkMode ? 'border-[#1c3149] bg-[#13243a]' : 'border-slate-200 bg-white'}`}>
+                <div className={`file-list-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-xl border ${darkMode ? 'border-[#1c3149] bg-[#13243a]' : 'border-slate-200 bg-white'}`}>
                     {filteredPdfs.map((pdf) => (
                         <div key={pdf.recordId} className={`flex min-h-[62px] items-center justify-between gap-4 border-b px-5 py-3 last:border-b-0 transition-colors ${theme.itemCard}`}>
                             <div className="flex items-center gap-3.5 min-w-0">

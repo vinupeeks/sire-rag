@@ -216,7 +216,7 @@ const KnowledgeSourcesPage = () => {
                 main={(
                     <div className={`flex h-screen flex-col ${darkMode ? 'bg-[#0f172a] text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
                         <ToolTabs />
-                        <div className="flex-1 overflow-hidden">
+                        <div className="min-h-0 flex-1 overflow-hidden">
                             {activeSource === 'ocimf-files' ? (
                                 <OcimfFilesView
                                     files={ocimfFiles}

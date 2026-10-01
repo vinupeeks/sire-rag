@@ -138,10 +138,10 @@ const History = ({ darkMode }) => {
                 >
                     <div>
                         <h1 className={`text-2xl font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>
-                            Operator Comments History
+                            Operator Response History
                         </h1>
                         <p className={`mt-1 text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                            View and filter your submitted operator comments
+                            View and filter your submitted operator responses
                         </p>
                     </div>
 
@@ -344,7 +344,7 @@ const History = ({ darkMode }) => {
 
                                                             <div className="mb-3">
                                                                 <span className={`text-base font-semibold ${darkMode ? 'text-white' : 'text-slate-500'}`}>
-                                                                    Operator Comments
+                                                                    Operator Responses
                                                                 </span>
                                                             </div>
 

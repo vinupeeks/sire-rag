@@ -136,7 +136,7 @@ const InlineOperatorComments = ({ details, darkMode, files = [], onCommentGenera
             setOperatorFeedback('');
             onCommentGenerated?.(latestComment);
         } catch (error) {
-            setErrorMessage(error?.data?.message || 'Failed to generate operator comments. Please try again.');
+            setErrorMessage(error?.data?.message || 'Failed to generate operator response. Please try again.');
         }
     };
 
@@ -146,7 +146,7 @@ const InlineOperatorComments = ({ details, darkMode, files = [], onCommentGenera
                 {/* Section Header & Pagination */}
                 <div className="mb-2 flex items-center justify-between gap-3">
                     <div>
-                        <h4 className={`text-sm font-semibold ${darkMode ? 'text-sky-400' : 'text-sky-700'}`}>Draft Operator Comments</h4>
+                        <h4 className={`text-sm font-semibold ${darkMode ? 'text-sky-400' : 'text-sky-700'}`}>Draft Operator Response</h4>
                         {comment.name && (
                             <p className={`mt-1 text-xs ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
                                 {comment.name} {comment.date ? `• ${comment.date}` : ''}
@@ -158,13 +158,13 @@ const InlineOperatorComments = ({ details, darkMode, files = [], onCommentGenera
                             <div className="flex items-center gap-2">
                                 <span className={`text-xs font-medium uppercase tracking-wider ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>Versions</span>
                                 <div className={`flex items-center gap-1 rounded-lg border p-1 ${darkMode ? 'border-slate-700/60 bg-slate-800/50' : 'border-slate-200 bg-white'}`}>
-                                    <button type="button" onClick={() => setSelectedCommentIndex((current) => Math.max(0, current - 1))} disabled={selectedCommentIndex === 0} aria-label="Latest operator comment" title="Latest operator comment" className={`rounded-md p-1 ${darkMode ? 'text-slate-300 hover:bg-slate-700' : 'text-slate-500 hover:bg-slate-100'} disabled:opacity-30`}><ChevronLeft className="h-4 w-4" /></button>
+                                    <button type="button" onClick={() => setSelectedCommentIndex((current) => Math.max(0, current - 1))} disabled={selectedCommentIndex === 0} aria-label="Latest operator response" title="Latest operator response" className={`rounded-md p-1 ${darkMode ? 'text-slate-300 hover:bg-slate-700' : 'text-slate-500 hover:bg-slate-100'} disabled:opacity-30`}><ChevronLeft className="h-4 w-4" /></button>
                                     <span className={`px-2 text-xs font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{selectedCommentIndex + 1} / {displayedComments.length}</span>
-                                    <button type="button" onClick={() => setSelectedCommentIndex((current) => Math.min(displayedComments.length - 1, current + 1))} disabled={selectedCommentIndex === displayedComments.length - 1} aria-label="Previous generated operator comment" title="Previous generated operator comment" className={`rounded-md p-1 ${darkMode ? 'text-slate-300 hover:bg-slate-700' : 'text-slate-500 hover:bg-slate-100'} disabled:opacity-30`}><ChevronRight className="h-4 w-4" /></button>
+                                    <button type="button" onClick={() => setSelectedCommentIndex((current) => Math.min(displayedComments.length - 1, current + 1))} disabled={selectedCommentIndex === displayedComments.length - 1} aria-label="Previous generated operator response" title="Previous generated operator response" className={`rounded-md p-1 ${darkMode ? 'text-slate-300 hover:bg-slate-700' : 'text-slate-500 hover:bg-slate-100'} disabled:opacity-30`}><ChevronRight className="h-4 w-4" /></button>
                                 </div>
                             </div>
                         )}
-                        {generatedComment && <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-500">Latest generated comment</span>}
+                        {generatedComment && <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-500">Latest generated response</span>}
                     </div>
                 </div>
 
@@ -314,7 +314,7 @@ const InlineOperatorComments = ({ details, darkMode, files = [], onCommentGenera
                             </div>
                             <div className="space-y-1">
                                 <p className={`text-sm font-bold ${darkMode ? 'text-slate-100' : 'text-slate-900'}`}>
-                                    Generating Operator Comments (~1–2 mins)
+                                    Generating Operator Response (~1–2 mins)
                                 </p>
                                 <p className={`text-xs font-medium animate-pulse ${darkMode ? 'text-sky-400' : 'text-sky-600'}`}>
                                     {ANALYSIS_LOADING_MESSAGES[messageIndex]}
@@ -330,7 +330,7 @@ const InlineOperatorComments = ({ details, darkMode, files = [], onCommentGenera
                         Need changes? <span className="font-normal normal-case opacity-70">(Provide new feedback to regenerate)</span>
                     </label>
                     <span className="text-sm text-slate-400">
-                        This is an optional section. If you have any specific comments on this observation, we can include that in the draft comments generated.
+                        This is an optional section. If you have any specific response on this observation, we can include that in the draft response generated.
                     </span>
                     <textarea
                         id={`operator-feedback-${details.id}`}
@@ -348,7 +348,7 @@ const InlineOperatorComments = ({ details, darkMode, files = [], onCommentGenera
                             className="inline-flex items-center gap-2 rounded-lg bg-sky-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             <Sparkles className="h-4 w-4" />
-                            Regenerate comments
+                            Regenerate response
                         </button>
                     </div>
                 </div>
@@ -366,7 +366,7 @@ const InlineOperatorComments = ({ details, darkMode, files = [], onCommentGenera
                     </div>
                     <div className="space-y-1">
                         <p className={`text-sm font-bold ${darkMode ? 'text-slate-100' : 'text-slate-900'}`}>
-                            Generating Operator Comments (~1–2 mins)
+                            Generating Operator Response (~1–2 mins)
                         </p>
                         <p className={`text-xs font-medium animate-pulse ${darkMode ? 'text-sky-400' : 'text-sky-600'}`}>
                             {ANALYSIS_LOADING_MESSAGES[messageIndex]}
@@ -380,7 +380,7 @@ const InlineOperatorComments = ({ details, darkMode, files = [], onCommentGenera
 
             <form onSubmit={handleSubmit} className="space-y-1">
                 <div>
-                    <h4 className={`text-sm font-semibold ${darkMode ? 'text-sky-400' : 'text-sky-700'}`}>Draft Operator Comments</h4>
+                    <h4 className={`text-sm font-semibold ${darkMode ? 'text-sky-400' : 'text-sky-700'}`}>Draft Operator Response</h4>
                 </div>
                 <div>
                     <label htmlFor={`operator-feedback-${details.id}`} className={`text-sm font-semibold tracking-wide ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
@@ -388,14 +388,14 @@ const InlineOperatorComments = ({ details, darkMode, files = [], onCommentGenera
                         <span className="font-normal opacity-70">(optional)</span>
                     </label><br />
                     <span className="text-sm text-slate-400">
-                        This is an optional section. If you have any specific comments on this observation, we can include that in the draft comments generated.
+                        This is an optional section. If you have any specific response on this observation, we can include that in the draft response generated.
                     </span>
 
                     <textarea id={`operator-feedback-${details.id}`} value={operatorFeedback} onChange={(event) => setOperatorFeedback(event.target.value)} rows={3} className={`mt-2 w-full resize-none rounded-lg border px-4 py-3 text-sm outline-none transition focus:border-sky-500 focus:ring-1 focus:ring-sky-500 ${darkMode ? 'border-slate-600 bg-slate-900/80 text-slate-100 placeholder:text-slate-500' : 'border-slate-300 bg-white text-slate-900 placeholder:text-slate-400'}`} />
                 </div>
                 {errorMessage && <p className="text-sm text-rose-500">{errorMessage}</p>}
                 <div className="flex justify-end">
-                    <button type="submit" disabled={isGenerating} className="inline-flex items-center gap-2 rounded-lg bg-sky-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-60"><Sparkles className="h-4 w-4" />Generate operator comments</button>
+                    <button type="submit" disabled={isGenerating} className="inline-flex items-center gap-2 rounded-lg bg-sky-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-60"><Sparkles className="h-4 w-4" />Generate operator response</button>
                 </div>
             </form>
         </div>

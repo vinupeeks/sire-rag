@@ -84,6 +84,7 @@ const ArchivedInspectionItem = ({ details, darkMode, files = [] }) => {
     const existingComments = Array.isArray(details.comments) ? details.comments : [];
     const comment = existingComments[selectedCommentIndex];
     const visibleSources = (comment?.sources || []).filter((source) => (
+        source?.filename?.trim().toLowerCase() !== 'questions.xlsx' &&
         !source?.snippet?.trim().toLowerCase().startsWith('i cannot find')
     ));
 
@@ -165,14 +166,14 @@ const ArchivedInspectionItem = ({ details, darkMode, files = [] }) => {
                         <div className={`mt-5 border-t pt-5 ${darkMode ? 'border-slate-700/50' : 'border-slate-200/80'}`}>
                             <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                                 <div>
-                                    <h4 className={`text-sm font-semibold ${darkMode ? 'text-sky-400' : 'text-sky-700'}`}>Operator Comment</h4>
+                                    <h4 className={`text-sm font-semibold ${darkMode ? 'text-sky-400' : 'text-sky-700'}`}>Operator Response</h4>
                                     <p className={`mt-1 text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{comment.name || `Comment ${selectedCommentIndex + 1}`}</p>
                                 </div>
                                 {existingComments.length > 1 && (
                                     <div className={`flex items-center gap-1 rounded-lg border p-1 ${darkMode ? 'border-slate-700/60 bg-slate-800/50' : 'border-slate-200 bg-white'}`}>
-                                        <button type="button" onClick={showPreviousComment} disabled={selectedCommentIndex === 0} aria-label="Previous operator comment" title="Previous operator comment" className={`rounded-md p-1 ${darkMode ? 'text-slate-300 hover:bg-slate-700' : 'text-slate-500 hover:bg-slate-100'} disabled:opacity-30`}><ChevronLeft className="h-4 w-4" /></button>
+                                        <button type="button" onClick={showPreviousComment} disabled={selectedCommentIndex === 0} aria-label="Previous operator response" title="Previous operator response" className={`rounded-md p-1 ${darkMode ? 'text-slate-300 hover:bg-slate-700' : 'text-slate-500 hover:bg-slate-100'} disabled:opacity-30`}><ChevronLeft className="h-4 w-4" /></button>
                                         <span className={`px-2 text-xs font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{selectedCommentIndex + 1} / {existingComments.length}</span>
-                                        <button type="button" onClick={showNextComment} disabled={selectedCommentIndex === existingComments.length - 1} aria-label="Next operator comment" title="Next operator comment" className={`rounded-md p-1 ${darkMode ? 'text-slate-300 hover:bg-slate-700' : 'text-slate-500 hover:bg-slate-100'} disabled:opacity-30`}><ChevronRight className="h-4 w-4" /></button>
+                                        <button type="button" onClick={showNextComment} disabled={selectedCommentIndex === existingComments.length - 1} aria-label="Next operator response" title="Next operator response" className={`rounded-md p-1 ${darkMode ? 'text-slate-300 hover:bg-slate-700' : 'text-slate-500 hover:bg-slate-100'} disabled:opacity-30`}><ChevronRight className="h-4 w-4" /></button>
                                     </div>
                                 )}
                             </div>
@@ -268,7 +269,7 @@ const ArchivedInspectionItem = ({ details, darkMode, files = [] }) => {
                             )}
                         </div>
                     ) : (
-                        <p className={`mt-5 border-t pt-5 text-sm ${darkMode ? 'border-slate-700/50 text-slate-400' : 'border-slate-200/80 text-slate-500'}`}>No operator comments are available for this inspection item.</p>
+                        <p className={`mt-5 border-t pt-5 text-sm ${darkMode ? 'border-slate-700/50 text-slate-400' : 'border-slate-200/80 text-slate-500'}`}>No operator responses are available for this inspection item.</p>
                     )}
                 </div>
             )}

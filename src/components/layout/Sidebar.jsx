@@ -113,7 +113,7 @@ const Sidebar = ({
             {!collapsed && (
                 <nav className="flex min-h-0 flex-1 flex-col overflow-hidden">
                     <div className="shrink-0 border-b border-[#1c3149] px-3 py-3">
-                        <p className={`px-3 pb-1 text-xl font-medium ${theme.textPrimary}`}>Operator comments</p>
+                        <p className={`px-3 pb-1 text-xl font-medium ${theme.textPrimary}`}>Operator response</p>
                         {[
                             { label: 'Inspections', icon: ClipboardList, path: ROUTES.OPERATOR_COMMENTS_FROM_REPORT_INSPECTIONS, active: location.pathname.startsWith(ROUTES.OPERATOR_COMMENTS_FROM_REPORT_INSPECTIONS) && !location.state?.fromHistory },
                             // { label: 'Submitted', icon: Check, path: ROUTES.OPERATOR_COMMENTS_SUBMITTED, active: location.pathname === ROUTES.OPERATOR_COMMENTS_SUBMITTED },

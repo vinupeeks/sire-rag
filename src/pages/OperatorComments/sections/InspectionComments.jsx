@@ -268,7 +268,7 @@ const InspectionComments = ({ darkMode }) => {
                     {isFormVisible ? (
                         <div>
                             <h1 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>
-                                Operator Comments
+                                Operator Responses
                             </h1>
 
                             <p className={`mt-1 text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'}`} >
@@ -384,7 +384,7 @@ const InspectionComments = ({ darkMode }) => {
 
                         <div className="mb-3">
                             <span className={`text-base font-semibold ${darkMode ? 'text-white' : 'text-slate-500'}`}>
-                                Operator Comments
+                                Operator Responses
                             </span>
                         </div>
 

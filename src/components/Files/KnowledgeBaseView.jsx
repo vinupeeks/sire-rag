@@ -70,7 +70,7 @@ const KnowledgeBaseView = ({
                         </span>
                     </div>
                     <p className={`mt-1 max-w-[720px] text-[13px] leading-6 ${theme.textSecondary}`}>
-                        Your own manuals and procedures. The assistant reads these when it drafts an operator comment or answers an SMS search.
+                        Your own manuals and procedures. The assistant reads these when it drafts an operator response or answers an SMS search.
                     </p>
                 </div>
 

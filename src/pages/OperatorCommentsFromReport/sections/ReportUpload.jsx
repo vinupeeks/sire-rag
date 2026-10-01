@@ -102,7 +102,7 @@ const ReportUpload = ({ darkMode }) => {
             <div className="mx-auto flex h-full max-w-[1200px] flex-col gap-5">
                 <div>
                     <h1 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>Inspections</h1>
-                    <p className={`mt-1 text-[13px] ${mutedTextClass}`}>Pick an inspection to write operator comments on its findings.</p>
+                    <p className={`mt-1 text-[13px] ${mutedTextClass}`}>Pick an inspection to write operator responses on its findings.</p>
                 </div>
 
                 <form onSubmit={(event) => event.preventDefault()} className={`flex flex-1 flex-col items-center justify-center space-y-5 rounded-xl border p-8 text-center ${panelClass}`}>

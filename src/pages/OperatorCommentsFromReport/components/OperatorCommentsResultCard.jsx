@@ -22,7 +22,7 @@ const OperatorCommentsResultCard = ({ darkMode, title, resultKey, content }) => 
             setCopied(true);
             window.setTimeout(() => setCopied(false), 2000);
         } catch (error) {
-            console.error('Failed to copy operator comment:', error);
+            console.error('Failed to copy operator Responses:', error);
         }
     };
 

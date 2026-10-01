@@ -86,14 +86,14 @@ const LoginPage = () => {
             </h2>
 
             <span className="block bg-gradient-to-r from-cyan-300 to-blue-300 bg-clip-text text-lg font-semibold text-transparent">
-              Draft operator comments and search the safety management system, in one place.
+              Draft operator responses and search the safety management system, in one place.
             </span>
 
             <div className="w-[413px] space-y-[14px] py-4">
-              {/* Operator comments */}
+              {/* Operator responses */}
               <div className="h-[68px] rounded-[10px] bg-[#112f4a] px-8 py-[14px]">
                 <h3 className="text-[16px] font-medium leading-5 text-white">
-                  Operator Comments Assistant
+                  Operator Response Assistant
                 </h3>
                 <p className="text-[14px] leading-5 text-[#8eb5d8]">
                   Draft, review, refine
@@ -130,7 +130,7 @@ const LoginPage = () => {
 
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-slate-900">
-                Welcome Back
+                Login to your account
               </h1>
 
               <p className="mt-2 text-sm text-slate-500">

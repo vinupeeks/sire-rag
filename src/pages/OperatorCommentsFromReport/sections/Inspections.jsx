@@ -60,7 +60,7 @@ const Inspections = ({ darkMode }) => {
                 <div className="flex items-start justify-between gap-5">
                     <div>
                         <h1 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>Inspections</h1>
-                        <p className={`mt-1 text-[13px] ${mutedTextClass}`}>Pick an inspection to write operator comments on its findings.</p>
+                        <p className={`mt-1 text-[13px] ${mutedTextClass}`}>Pick an inspection to write operator response on its findings.</p>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -90,7 +90,7 @@ const Inspections = ({ darkMode }) => {
                     {[
                         'Upload the SIRE 2.0 report',
                         'Review the listed findings',
-                        'Generate operator comments',
+                        'Generate operator response',
                         'Add a comment and draft again',
                     ].map((step, index) => (
                         <div key={step} className="flex items-center gap-3">

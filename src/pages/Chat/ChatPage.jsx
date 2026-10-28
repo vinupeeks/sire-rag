@@ -117,7 +117,8 @@ const ChatPage = () => {
                 history,
                 user_id: user?.id,
                 conversation_id: activeConversationId,
-                titleNeeded: isFirstRealQuestion
+                titleNeeded: isFirstRealQuestion,
+                fromSMS: true
             };
 
             const response = await queryChatMutation(payload).unwrap();
